@@ -1,0 +1,3 @@
+[submodule "AppliedML"]
+	path = AppliedML
+	url = https://github.com/mselezniova/AppliedML.git
