@@ -2,6 +2,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 
+import random
+
 class ConcentricCircles:
     def __init__(self, num_circles=2, num_samples_per_circle=100, variation=0.1):
         super().__init__()
@@ -20,8 +22,19 @@ class ConcentricCircles:
         return x, y
         
     def generate_sample(self):
-        radii = np.random.uniform(0, 1, self.num_circles)
-        radii.sort()
+        step = 1
+        
+        min_radius = 0
+        max_radius = 1
+        
+        radii = []
+        
+        for i in range(self.num_circles):
+            radius = random.uniform(min_radius, max_radius)
+            min_radius = radius + step
+            max_radius = radius + 2*step
+            radii.append(radius)
+        radii = np.array(radii)
         
         differences = np.abs(np.diff(radii, prepend=0, append=0))
         min_difference = np.minimum(differences[:-1], differences[1:])
