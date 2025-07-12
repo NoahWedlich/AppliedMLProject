@@ -6,7 +6,7 @@ from AppliedML.courselib.utils.preprocessing import labels_encoding
 
 from AppliedML.courselib.optimizers import GDOptimizer
 
-import datagen.ConcentricCircles as cc
+import datagen.ConcentricBands as cc
 
 import numpy as np
 import matplotlib
@@ -76,14 +76,14 @@ tunable_model = TunableModel(
 
 params = {
     'widths': [(2, 10, 3), (2, 10, 10, 3), (2, 50, 10, 3), (2, 50, 50, 3)],
-    'activation': ['ReLU'],
+    'activation': ['ReLU', 'Sigmoid'],
 }
 
 tunable_model = TunableModel(
     model_class=nn.MLP,
     hyperparameters=params,
     validator=None,
-    optimizer=GDOptimizer(learning_rate=0.3)
+    optimizer=GDOptimizer(learning_rate=1)
 )
 
 models = tunable_model.fit(
@@ -95,7 +95,7 @@ models = tunable_model.fit(
 
 print(f"Trained {len(models)} models with different hyperparameters.")
 
-fig, axs = plt.subplots(2, 2, figsize=(10, 10))
+fig, axs = plt.subplots(2, 4, figsize=(20, 10))
 
 x_min, x_max = df['x'].min() - 0.5, df['x'].max() + 0.5
 y_min, y_max = df['y'].min() - 0.5, df['y'].max() + 0.5
