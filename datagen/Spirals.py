@@ -22,23 +22,14 @@ class Spirals(MatrixSampler):
         partOfTurn = np.arctan2(y, x) / (2 * np.pi)
         spiralDist = (outerRadius - innerRadius) / rotations
         for i in range(nBranches):
-            for j in range(rotations):
-                if abs(np.sqrt(x**2 + y**2) - (innerRadius + spiralDist * (((partOfTurn + i/nBranches) % 1) + j))) <= width:
-                    return i + 1
+            pointRad = np.sqrt(x**2 + y**2)
+            pointRadOff = pointRad - spiralDist * ((partOfTurn + i/nBranches) % 1)
+            if innerRadius <= pointRad <= outerRadius and (pointRadOff % spiralDist) <= width:
+                return i + 1
         return 0
-
-    def get_normalizer(self):
-        return CoordinateMapper(
-            x_in_range=(0, 100),
-            y_in_range=(0, 100),
-            x_out_range=(-1, 1),
-            y_out_range=(-1, 1)
-        )
 
     def sample(self, num_samples=100):
         coords = np.meshgrid(np.linspace(-1, 1, 100), np.linspace(-1, 1, 100))
         image = np.vectorize(self.get_label)(coords[0], coords[1])
-
-        self.set_postprocesser(self.get_normalizer())
 
         return super().sample(image, num_samples=num_samples)
