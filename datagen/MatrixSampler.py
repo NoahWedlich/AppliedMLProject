@@ -40,7 +40,7 @@ class MatrixSampler:
                 missed_samples += 1
                 continue
             
-            value = image[cords[0], cords[1]]
+            value = image[cords[1], cords[0]]
             
             if value in self.labels.keys():
                 generated_samples += 1

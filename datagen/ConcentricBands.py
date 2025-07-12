@@ -1,7 +1,7 @@
 import numpy as np
 
-from MatrixSampler import MatrixSampler
-from Postprocessors import *
+from datagen.MatrixSampler import MatrixSampler
+from datagen.Postprocessors import *
 
 class ConcentricBands(MatrixSampler):
     

@@ -1,5 +1,7 @@
-import numpy as np
 import random
+import multiprocessing as mp
+
+import numpy as np
 
 class CombinationIterator:
     
@@ -39,26 +41,43 @@ class CombinationIterator:
 
 class TunableModel:
     
-    def __init__(self, model_class, hyperparameters, validator=None, optimizer=None,):
+    def __init__(self, model_class, hyperparameters, validator=None, random_seed=None):
         self.model_class = model_class
-        self.optimizer = optimizer
         self.combination_iterator = CombinationIterator(hyperparameters, validator)
-              
-        self.seed = random.randint(0, 1000000)
+        
+        np.random.seed(random_seed or random.randint(0, 1000000))
         
         self.models = []
         
     def get_model(self, parameters):
-        parameters['optimizer'] = self.optimizer
-        np.random.seed(self.seed)
+        optimizer = parameters.get('optimizer', None)
+        if callable(optimizer):
+            parameters['optimizer'] = optimizer(parameters)
+        
         return self.model_class(**parameters)
         
+    def _fit_model(self, index, model, X, y, training_params=None, metrics_dict=None):
+        metrics = model.fit(X, y, **(training_params or {}), **(metrics_dict or {}))
+        print(f"Model {index} fitted.")
+        return (metrics, model)
+        
     def fit(self, X, y, training_params=None, metrics_dict=None):
-        for params in self.combination_iterator:
-            model = self.get_model(params)
-            
-            metrics = model.fit(X, y, **(training_params or {}), **(metrics_dict or {}))
-            
-            self.models.append((model, params, metrics))
-            
+        params = list(self.combination_iterator)
+        models = [self.get_model(params) for params in params]
+        
+        if callable(training_params):
+            instantiate_training_params = [training_params(param) for param in params]
+        else:
+            instantiate_training_params = [training_params] * len(params)
+        
+        arguments = [(i, model, X, y, t_params, metrics_dict)
+            for i, (model, t_params) in enumerate(zip(models, instantiate_training_params))]
+        
+        process_count = min(mp.cpu_count() // 2, len(models))
+        
+        with mp.Pool(process_count) as pool:
+            print(f"Started fitting {len(models)} models on {process_count} processes.")
+            results = pool.starmap(self._fit_model, arguments)
+        
+        self.models = [(model, params, metrics) for params, (metrics, model) in zip(params, results)]
         return self.models
