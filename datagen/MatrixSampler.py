@@ -1,6 +1,8 @@
 import numpy as np
 import pandas as pd
 
+from datagen.Postprocessors import *
+
 class MatrixSampler:
     
     def __init__(self, labels, random_seed=None):
@@ -15,6 +17,14 @@ class MatrixSampler:
         
     def get_default_generator(self):
         return lambda w, h: self.generator.random((2,)) * np.array([w, h])
+        
+    def get_normalizer(self, width, height):
+        return CoordinateMapper(
+            x_in_range=(0, width),
+            y_in_range=(0, height),
+            x_out_range=(-1, 1),
+            y_out_range=(-1, 1)
+        )
         
     def set_preprocesser(self, preprocesser):
         if preprocesser is not None:
@@ -44,9 +54,12 @@ class MatrixSampler:
             
             if value in self.labels.keys():
                 generated_samples += 1
-                yield *self.postprocesser(point), self.labels[value]
+                normalized_point = self.get_normalizer(image.shape[1], image.shape[0])(point)
+                yield *self.postprocesser(normalized_point), self.labels[value]
             else:
                 missed_samples += 1
+                
+        print(f"Generated {generated_samples} samples, missed {missed_samples} samples.")
         
     def sample(self, image, num_samples=100):
         image = self.preprocesser(image)

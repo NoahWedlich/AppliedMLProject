@@ -1,7 +1,7 @@
 import numpy as np
 
-from MatrixSampler import MatrixSampler
-from Postprocessors import *
+from datagen.MatrixSampler import MatrixSampler
+from datagen.Postprocessors import *
 
 class HalfMoons(MatrixSampler):
 
@@ -34,18 +34,8 @@ class HalfMoons(MatrixSampler):
                     return i + 1
         return 0
 
-    def get_normalizer(self):
-        return CoordinateMapper(
-            x_in_range=(0, 100),
-            y_in_range=(0, 100),
-            x_out_range=(-1, 1),
-            y_out_range=(-1, 1)
-        )
-
     def sample(self, num_samples=100):
         coords = np.meshgrid(np.linspace(-1, 1, 100), np.linspace(-1, 1, 100))
         image = np.vectorize(self.get_label)(coords[0], coords[1])
-
-        self.set_postprocesser(self.get_normalizer())
 
         return super().sample(image, num_samples=num_samples)

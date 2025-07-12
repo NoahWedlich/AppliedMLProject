@@ -50,20 +50,11 @@ class SeparatedBlobs(MatrixSampler):
         
         return np.array([x, y])
         
-    def get_normalizer(self):
-        return CoordinateMapper(
-            x_in_range=(0, 100),
-            y_in_range=(0, 100),
-            x_out_range=(-1, 1),
-            y_out_range=(-1, 1)
-        )
-        
     def sample(self, num_samples=100):
         coords = np.meshgrid(np.linspace(-1, 1, 100), np.linspace(-1, 1, 100))
         image = np.vectorize(self.get_label)(coords[0], coords[1])
         
         self.point_generator = self.generate_point
-        self.set_postprocesser(self.get_normalizer())
         
         samples = super().sample(image, num_samples=num_samples)
         
