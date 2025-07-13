@@ -1,10 +1,7 @@
-import math
 import numpy as np
 
 from datagen.SampleGenerator import SampleGenerator
 from dataclasses import dataclass
-
-import matplotlib.pyplot as plt
 
 @dataclass
 class CBandConf:
@@ -20,7 +17,7 @@ class ConcentricBands(SampleGenerator):
 
         self.bandsConf = bandsConf
 
-        labels = {i: f'Band {i+1}' for i in range(len(bandsConf))}
+        labels = {i: f'Band {i}' for i in range(len(bandsConf))}
 
         super().__init__(labels=labels)
 
@@ -28,7 +25,7 @@ class ConcentricBands(SampleGenerator):
         for _ in range(num_samples):
             band = np.random.choice(self.bandsConf)
             angle = np.random.uniform(0, 2 * np.pi)
-            radius = np.sqrt(band.radius + np.random.uniform(-band.width / 2, band.width / 2))
+            radius = np.sqrt(np.random.uniform((band.radius-band.width / 2)**2, (band.radius+band.width / 2)**2))
             
             x = radius * np.cos(angle)
             y = radius * np.sin(angle)
