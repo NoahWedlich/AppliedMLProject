@@ -1,9 +1,9 @@
 import numpy as np
 
-from MatrixSampler import MatrixSampler
+from SampleGenerator import SampleGenerator
 from Postprocessors import *
 
-class Spirals(MatrixSampler):
+class Spirals(SampleGenerator):
 
     def __init__(self, spirals=None, include_background=False, random_seed=None):
         if spirals is None:
@@ -27,9 +27,3 @@ class Spirals(MatrixSampler):
             if innerRadius <= pointRad <= outerRadius and (pointRadOff % spiralDist) <= width:
                 return i + 1
         return 0
-
-    def sample(self, num_samples=100):
-        coords = np.meshgrid(np.linspace(-1, 1, 100), np.linspace(-1, 1, 100))
-        image = np.vectorize(self.get_label)(coords[0], coords[1])
-
-        return super().sample(image, num_samples=num_samples)

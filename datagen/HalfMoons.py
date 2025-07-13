@@ -1,9 +1,9 @@
 import numpy as np
 
-from datagen.MatrixSampler import MatrixSampler
+from datagen.SampleGenerator import SampleGenerator
 from datagen.Postprocessors import *
 
-class HalfMoons(MatrixSampler):
+class HalfMoons(SampleGenerator):
 
     def __init__(self, moons=None, include_background=False, random_seed=None):
         if moons is None:
@@ -33,9 +33,3 @@ class HalfMoons(MatrixSampler):
                 if in_angle_range(angle, angle_range):
                     return i + 1
         return 0
-
-    def sample(self, num_samples=100):
-        coords = np.meshgrid(np.linspace(-1, 1, 100), np.linspace(-1, 1, 100))
-        image = np.vectorize(self.get_label)(coords[0], coords[1])
-
-        return super().sample(image, num_samples=num_samples)

@@ -1,11 +1,11 @@
 import numpy as np
 
-from datagen.MatrixSampler import MatrixSampler
+from datagen.SampleGenerator import SampleGenerator
 from datagen.Postprocessors import *
 
 import matplotlib.pyplot as plt
 
-class SeparatedBlobs(MatrixSampler):
+class SeparatedBlobs(SampleGenerator):
     
     def __init__(self, blobs=None, include_background=False, random_seed=None):
         if blobs is None:
@@ -51,14 +51,9 @@ class SeparatedBlobs(MatrixSampler):
         return np.array([x, y])
         
     def sample(self, num_samples=100):
-        coords = np.meshgrid(np.linspace(-1, 1, 100), np.linspace(-1, 1, 100))
-        image = np.vectorize(self.get_label)(coords[0], coords[1])
-        
         self.point_generator = self.generate_point
         
-        samples = super().sample(image, num_samples=num_samples)
-        
-        return samples
+        return super().sample(num_samples=num_samples)
         
 class RandomSeparatedBlobs(SeparatedBlobs):
     
