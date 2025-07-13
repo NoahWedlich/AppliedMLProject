@@ -57,7 +57,7 @@ class TunableModel:
         
     def _fit_model(self, index, model, X, y, training_params=None):
         metrics = model.fit(X, y, **(training_params or {}))
-        print(f"Model {index} fitted.")
+        # print(f"Model {index} fitted.")
         return (metrics, model)
         
     def fit(self, X, y, training_params=None):
@@ -74,7 +74,7 @@ class TunableModel:
         
         process_count = min(self.process_count, len(models))
         with mp.Pool(process_count) as pool:
-            print(f"Started fitting {len(models)} models on {process_count} processes.")
+            # print(f"Started fitting {len(models)} models on {process_count} processes.")
             results = pool.starmap(self._fit_model, arguments)
         
         self.models = [(model, params, metrics) for params, (metrics, model) in zip(params, results)]

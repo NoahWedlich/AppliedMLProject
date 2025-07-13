@@ -40,10 +40,90 @@ def validator(params):
 
 if __name__ == "__main__":
     
-    seed = np.random.randint(0, 1000000)
-    seed = 789368
-    np.random.seed(seed)
-    print(f"Using random seed: {seed}")
+    # params = {
+    #     'kernel': ['rbf', 'polynomial'],
+    #     'sigma': [0.025, 0.1],
+    #     'degree': range(1),
+    #     'intercept': range(3),
+    # }
+    
+    params = {
+        'widths': [(2, 10, 10, 2), (2, 100, 100, 2)],
+        'activation': ['ReLU'],
+        # 'activation': ['ReLU', 'Sigmoid'],
+    }
+    
+    params['optimizer'] = get_optimizer
+    
+    tunable_model = TunableModel(
+        model_class=nn.MLP,
+        hyperparameters=params,
+        validator=None,
+    )
+            
+    # tunable_model = TunableModel(
+    #     model_class=svm.BinaryKernelSVM,
+    #     hyperparameters=params,
+    #     validator=validator
+    # )
+    
+    total_samples = 400
+    train_test_split = 0.5
+    
+    num_train_samples = int(total_samples * train_test_split)
+    
+    # seed = 83703 - 0.02, 0.1
+    # seed = 910666 - 0.025, 0.1
+    
+    iterations = 0
+    while True:
+        seed = np.random.randint(0, 1000000)
+        # seed = 179350
+        np.random.seed(seed)
+        
+        sampler = sp.Spirals(sp.SpiralConf(2, 0.1, 0.2, 1, 1))
+        # sampler.add_postprocesser(LabelNoise(0.05))
+        
+        df = sampler.sample(total_samples)
+        # df['label'] = df['label'].astype("category").cat.codes * 2 - 1
+        # df['label'] = labels_encoding(df['label'].to_numpy())
+        
+        train_df = df[:num_train_samples]
+        test_df = df[num_train_samples:]
+        
+        # models = tunable_model.fit(train_df[['x', 'y']].to_numpy(), train_df['label'].to_numpy())
+        
+        models = tunable_model.fit(
+            train_df[['x', 'y']].to_numpy(),
+            labels_encoding(train_df['label'].to_numpy()),
+            training_params={
+                'num_epochs': 10000,
+                'batch_size': len(df[['label']]),
+                # 'compute_metrics': True,
+                # 'metrics_dict': {'accuracy': accuracy, 'loss': mean_squared_error}
+            }
+        )
+        
+        accuracies = []
+        for model, params, metrics in models:
+            h_train = model(train_df[['x', 'y']].to_numpy())
+            h_test = model(test_df[['x', 'y']].to_numpy())
+
+            train_accuracy = accuracy(h_train, train_df['label'].to_numpy(), False)
+            test_accuracy = accuracy(h_test, test_df['label'].to_numpy(), False)
+            
+            accuracies.append((train_accuracy, test_accuracy))
+            
+        print(f"Iteration {iterations}: Low: ({accuracies[0][0]:.2f}, {accuracies[0][1]:.2f}), High: ({accuracies[-1][0]:.2f}, {accuracies[-1][1]:.2f})")
+        iterations += 1
+            
+        # if accuracies[0][0] == 100 and accuracies[0][1] < 80:
+        #     if accuracies[1][0] == 100 and accuracies[1][1] == 100:
+        #         break
+        break
+        
+        
+    print(f"Found models with seed {seed} after {iterations} iterations.")
     
     # image = im.ImageSampler.open_image("smile.png")
     # image = np.vectorize(lambda x: 1 if x > 0 else 0)(image)
@@ -64,24 +144,20 @@ if __name__ == "__main__":
     # 
     # sampler = im.ImageSampler(pallete, labels=labels, image=image, random_seed=42)
     # sampler = sb.RandomSeparatedBlobs(2)
-    sampler = sp.Spirals(sp.SpiralConf(2, 0.25, 0.2, 0.8, 1))
+    # sampler = sp.Spirals(sp.SpiralConf(2, 0.05, 0.2, 1, 2))
     # sampler = cb.RandomConcentricBands(2, 0.2, 0.9)
     # sampler = hm.HalfMoons()
     
-    sampler.add_postprocesser(LabelNoise(0.01))
+    # sampler.add_postprocesser(LabelNoise(0.01))
     # sampler.add_postprocesser(DomainShift(10, 10))
     
-    total_samples = 200
-    train_test_split = 0.5
+    # df = sampler.sample(total_samples)
     
-    num_train_samples = int(total_samples * train_test_split)
+    # df['label'] = labels_encoding(df['label'].to_numpy())
+    # df['label'] = df['label'].astype("category").cat.codes * 2 - 1
     
-    df = sampler.sample(total_samples)
-    
-    df['label'] = labels_encoding(df['label'].to_numpy())
-    
-    train_df = df[:num_train_samples]
-    test_df = df[num_train_samples:]
+    # train_df = df[:num_train_samples]
+    # test_df = df[num_train_samples:]
     
     # plt.figure(figsize=(10, 10))
     # plt.scatter(x=df['x'], y=df['y'], c=df['label'].astype("category").cat.codes, cmap='viridis', edgecolor='k')
@@ -99,25 +175,13 @@ if __name__ == "__main__":
     #     validator=None
     # )
     
-    params = {
-        'kernel': ['rbf', 'polynomial'],
-        # 'sigma': np.linspace(0, 0.6, 10),
-        'sigma': [0.03, 0.06, 0.09, 0.12, 0.15, 0.3, 0.5, 0.6, 0.9],
-        'degree': range(1),
-        'intercept': range(3),
-    }
-            
-    tunable_model = TunableModel(
-        model_class=svm.BinaryKernelSVM,
-        hyperparameters=params,
-        validator=validator
-    )
     
-    models = tunable_model.fit(train_df[['x', 'y']].to_numpy(), train_df['label'].to_numpy())
     
-    fig, axs = plt.subplots(3, 3, figsize=(15, 15))
-    x_min, x_max = df['x'].min() - 0.5, df['x'].max() + 0.5
-    y_min, y_max = df['y'].min() - 0.5, df['y'].max() + 0.5
+    # models = tunable_model.fit(train_df[['x', 'y']].to_numpy(), train_df['label'].to_numpy())
+    
+    fig, axs = plt.subplots(1, 2, figsize=(10, 5))
+    x_min, x_max = df['x'].min() - 0.2, df['x'].max() + 0.2
+    y_min, y_max = df['y'].min() - 0.2, df['y'].max() + 0.2
     x_list, y_list = np.meshgrid(np.arange(x_min, x_max, 0.01), np.arange(y_min, y_max, 0.01))
     X_list = np.dstack([x_list, y_list])
     
@@ -127,8 +191,8 @@ if __name__ == "__main__":
     for ax, (model, params, metrics) in zip(axs.flat, models):
         # h_train = model.decision_function(train_df[['x', 'y']].to_numpy())
         # h_test = model.decision_function(test_df[['x', 'y']].to_numpy())
-        h_train = np.where(model.decision_function(train_df[['x', 'y']].to_numpy()) < 0, -1, 1)
-        h_test = np.where(model.decision_function(test_df[['x', 'y']].to_numpy()) < 0, -1, 1)
+        h_train = model(train_df[['x', 'y']].to_numpy())
+        h_test = model(test_df[['x', 'y']].to_numpy())
 
         train_accuracy = accuracy(h_train, train_df['label'].to_numpy(), False)
         test_accuracy = accuracy(h_test, test_df['label'].to_numpy(), False)
@@ -136,15 +200,14 @@ if __name__ == "__main__":
         # ax.set_title(f"n_estimators: {params['n_estimators']}, max_depth: {params['max_depth']}")
         # ax.set_title(f"Kernel: {params['kernel']}, Sigma: {params['sigma']:.1f}, Degree: {params['degree']}, Intercept: {params['intercept']}")
         
-        ax.set_title(f"Kernel: {params['kernel']} Train: {train_accuracy:.2f}%, Test: {test_accuracy:.2f}%")
+        ax.set_title(f"Width: {params['widths']} Train: {train_accuracy:.2f}%, Test: {test_accuracy:.2f}%")
         
         ax.set_xlim(x_min, x_max)
         ax.set_ylim(y_min, y_max)
         ax.set(aspect='equal')
         
-        
         # Plot decision boundary
-        h_list = np.where(model.decision_function(X_list) < 0, -1, 1)
+        h_list = model(X_list)
         
         ax.contourf(x_list, y_list, h_list, cmap=cmap, alpha=0.3)
         ax.scatter(df['x'], df['y'], c=colors, edgecolor='k')
