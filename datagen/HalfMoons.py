@@ -1,17 +1,24 @@
 import numpy as np
 
 from datagen.SampleGenerator import SampleGenerator
-from datagen.Postprocessors import *
+from dataclasses import dataclass
+
+@dataclass
+class HalfMoonConf:
+    radius: float = 0.5
+    width: float = 0.05
+    angle_range: tuple = (0, np.pi)
+    centre: tuple = (0, 0)
 
 class HalfMoons(SampleGenerator):
+    def __init__(self, moonConfig=None, include_background=False, random_seed=None):
+        if moonConfig is None:
+            moonConfig = [HalfMoonConf(centre=(-0.2,-0.2)),
+                          HalfMoonConf(angle_range=(3.14,6.29), centre=(0.2,0.2))]
 
-    def __init__(self, moons=None, include_background=False, random_seed=None):
-        if moons is None:
-            moons = [(0.5, 0.05, (0,3.14), (-0.2,-0.2)),(0.5, 0.05, (3.14,6.29), (0.2,0.2))]
+        self.moonConfig = moonConfig
 
-        self.moons = moons
-
-        labels = {i+1: f'Moon {i+1}' for i in range(len(moons))}
+        labels = {i+1: f'Moon {i+1}' for i in range(len(moonConfig))}
         if include_background:
             labels[0] = 'Background'
 
@@ -26,10 +33,10 @@ class HalfMoons(SampleGenerator):
             else:
                 return angle >= angle_range[0] or angle <= angle_range[1]
 
-        for i, (radius, width, angle_range, centre) in enumerate(self.moons):
-            offset = (x - centre[0], y - centre[1])
-            if (radius - width)**2 <= offset[0]**2 + offset[1]**2 <= (radius + width)**2:
+        for i, mc in enumerate(self.moonConfig):
+            offset = (x - mc.centre[0], y - mc.centre[1])
+            if (mc.radius - mc.width)**2 <= offset[0]**2 + offset[1]**2 <= (mc.radius + mc.width)**2:
                 angle = np.arctan2(offset[1], offset[0])
-                if in_angle_range(angle, angle_range):
+                if in_angle_range(angle, mc.angle_range):
                     return i + 1
         return 0
