@@ -56,12 +56,12 @@ class TunableModel:
         
         return self.model_class(**parameters)
         
-    def _fit_model(self, index, model, X, y, training_params=None, metrics_dict=None):
-        metrics = model.fit(X, y, **(training_params or {}), **(metrics_dict or {}))
+    def _fit_model(self, index, model, X, y, training_params=None):
+        metrics = model.fit(X, y, **(training_params or {}))
         print(f"Model {index} fitted.")
         return (metrics, model)
         
-    def fit(self, X, y, training_params=None, metrics_dict=None):
+    def fit(self, X, y, training_params=None):
         params = list(self.combination_iterator)
         models = [self.get_model(params) for params in params]
         
@@ -70,7 +70,7 @@ class TunableModel:
         else:
             instantiate_training_params = [training_params] * len(params)
         
-        arguments = [(i, model, X, y, t_params, metrics_dict)
+        arguments = [(i, model, X, y, t_params)
             for i, (model, t_params) in enumerate(zip(models, instantiate_training_params))]
         
         process_count = min(mp.cpu_count() // 2, len(models))
