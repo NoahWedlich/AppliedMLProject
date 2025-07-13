@@ -11,7 +11,7 @@ class HalfMoonConf:
     centre: tuple = (0, 0)
 
 class HalfMoons(SampleGenerator):
-    def __init__(self, moonConfig=None, include_background=False, random_seed=None):
+    def __init__(self, moonConfig=None):
         if moonConfig is None:
             moonConfig = [HalfMoonConf(centre=(-0.2,-0.2)),
                           HalfMoonConf(angle_range=(3.14,6.29), centre=(0.2,0.2))]

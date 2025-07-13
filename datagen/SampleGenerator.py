@@ -13,5 +13,10 @@ class SampleGenerator(Sampler):
     def _get_samples(self, num_samples):
         raise NotImplementedError("Subclasses should implement this method.")
         
+    def _get_samples_and_apply_postprocessors(self, num_samples):
+        for sample in self._get_samples(num_samples):
+            (x, y), label = self.apply_postprocesser(sample[:2], sample[2])
+            yield x, y, label
+        
     def sample(self, num_samples=100):
-        return pd.DataFrame(self._get_samples(num_samples), columns=['x', 'y', 'label'])
+        return pd.DataFrame(self._get_samples_and_apply_postprocessors(num_samples), columns=['x', 'y', 'label'])

@@ -14,6 +14,8 @@ import datagen.HalfMoons as hm
 import datagen.ImageSampler as im
 import datagen.Spirals as sp
 
+from datagen.Postprocessors import *
+
 from models.TunableRandomForest import TunableRandomForest
 
 import numpy as np
@@ -58,6 +60,10 @@ if __name__ == "__main__":
     # sampler = im.ImageSampler(pallete, labels=labels, image=image, random_seed=42)
     # sampler = sb.RandomSeparatedBlobs(2)
     sampler = sp.Spirals(sp.SpiralConf(2, 0.05, 0.2, 0.8, 2.6))
+    
+    sampler.add_postprocesser(LabelNoise(0.05))
+    sampler.add_postprocesser(DomainShift(10, 10))
+    
     # sampler = cb.RandomConcentricBands(3, 0.2, 0.9)
     # sampler = hm.HalfMoons()
     df = sampler.sample(5000)
