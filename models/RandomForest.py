@@ -1,7 +1,7 @@
 import numpy as np
 
 from AppliedML.courselib.models.base import TrainableModel
-from AppliedML.courselib.models import tree
+from AppliedML.courselib.models.tree import DecisionTreeClassifier
 
 class RandomForestClassifier(TrainableModel):
     
@@ -23,7 +23,7 @@ class RandomForestClassifier(TrainableModel):
             indices = np.random.choice(num_samples, size=num_samples, replace=True)
             X_sample, y_sample = X[indices], y[indices]
             
-            tree = tree.DecisionTreeClassifier(
+            tree = DecisionTreeClassifier(
                 max_depth=self.max_depth,
                 min_samples_split=self.min_samples_split,
                 max_features=self.max_features
@@ -38,9 +38,10 @@ class RandomForestClassifier(TrainableModel):
     
     def _average_vote(self, predictions):
         labels = np.unique(predictions)
+        labels.sort()
         label_ids = {label: i for i, label in enumerate(labels)}
         
-        indices = np.vectorize(lambda x: labels[x])(predictions)
+        indices = np.vectorize(lambda x: label_ids[x])(predictions)
         average_index = np.mean(indices, axis=0)
         
         return labels[np.round(average_index).astype(int)]

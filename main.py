@@ -9,8 +9,12 @@ from AppliedML.courselib.utils.preprocessing import labels_encoding
 from AppliedML.courselib.optimizers import GDOptimizer
 
 import datagen.ConcentricBands as cb
+import datagen.SeparatedBlobs as sb
 import datagen.HalfMoons as hm
 import datagen.ImageSampler as im
+import datagen.Spirals as sp
+
+from models.TunableRandomForest import TunableRandomForest
 
 import numpy as np
 import matplotlib
@@ -34,32 +38,77 @@ def validator(params):
 
 if __name__ == "__main__":
     
-    image = im.ImageSampler.open_image("smile.png")
-    image = np.vectorize(lambda x: 1 if x > 0 else 0)(image)
+    # image = im.ImageSampler.open_image("smile.png")
+    # image = np.vectorize(lambda x: 1 if x > 0 else 0)(image)
+    # 
+    # pallete = {
+    #     (1, 1, 1, 1): 0,  # White
+    #     (1, 0, 0, 1): 1,  # Red
+    #     (0, 1, 0, 1): 2,  # Green
+    #     (0, 0, 1, 1): 3,  # Blue
+    # }
+    # 
+    # labels = {
+    #     0: 'background',
+    #     1: 'eye1',
+    #     2: 'eye2',
+    #     3: 'mouth'
+    # }
+    # 
+    # sampler = im.ImageSampler(pallete, labels=labels, image=image, random_seed=42)
+    # sampler = sb.RandomSeparatedBlobs(2, False)
+    # sampler = sp.Spirals()
+    # sampler = cb.RandomConcentricBands(3, 0.2, 0.9, False)
+    sampler = hm.HalfMoons()
     
-    pallete = {
-        (1, 1, 1, 1): 0,  # White
-        (1, 0, 0, 1): 1,  # Red
-        (0, 1, 0, 1): 2,  # Green
-        (0, 0, 1, 1): 3,  # Blue
-    }
-    
-    labels = {
-        0: 'background',
-        1: 'eye1',
-        2: 'eye2',
-        3: 'mouth'
-    }
-    
-    sampler = im.ImageSampler(pallete, labels=labels, image=image, random_seed=42)
-    
-    df = sampler.sample(100)
+    df = sampler.sample(200)
     
     # plt.figure(figsize=(10, 10))
     # plt.scatter(df['x'], df['y'], c=df['label'].astype("category").cat.codes, cmap='viridis', edgecolor='k')
     # plt.xlim(-1, 1)
     # plt.ylim(-1, 1)
     # plt.show()
+    
+    params = {
+        'n_estimators': [1, 10, 100],
+        'max_depth': [1, 10, 100],
+        'min_samples_split': [2],
+        'max_features': [None]
+    }
+    
+    tunable_model = TunableRandomForest(
+        hyperparameters=params,
+        validator=None,
+        random_seed=None
+    )
+    
+    labels = np.unique(df['label'])
+    label_map = {label: i for i, label in enumerate(labels)}
+    df['label'] = df['label'].map(label_map).astype(int)
+    models = tunable_model.fit(df[['x', 'y']].to_numpy(), df['label'].to_numpy())
+    
+    fig, axs = plt.subplots(3, 3, figsize=(30, 30))
+    x_min, x_max = df['x'].min() - 0.5, df['x'].max() + 0.5
+    y_min, y_max = df['y'].min() - 0.5, df['y'].max() + 0.5
+    x_list, y_list = np.meshgrid(np.arange(x_min, x_max, 0.01), np.arange(y_min, y_max, 0.01))
+    X_list = np.dstack([x_list, y_list])
+    
+    cmap = matplotlib.colors.ListedColormap(['red', 'blue', 'green'])
+    colors = df['label'].astype("category").cat.codes
+    
+    for ax, (model, params, metrics) in zip(axs.flat, models):
+        ax.set_title(f"n_estimators: {params['n_estimators']}, max_depth: {params['max_depth']}")
+        ax.set_xlim(x_min, x_max)
+        ax.set_ylim(y_min, y_max)
+        
+        # Plot decision boundary
+        h_list = model.decision_function(X_list)
+        
+        ax.contourf(x_list, y_list, h_list, cmap=cmap, alpha=0.3)
+        ax.scatter(df['x'], df['y'], c=colors, edgecolor='k')
+        
+    plt.tight_layout()
+    plt.show()
     
     # gen = cb.RandomConcentricBands(2, 0.2, 0.5, False)
 #     gen = hm.HalfMoons()
@@ -117,53 +166,53 @@ if __name__ == "__main__":
 #     plt.tight_layout()
 #     plt.show()
 
-    params = {
-        'widths': [(2, 10, 4), (2, 10, 10, 4), (2, 50, 10, 4), (2, 50, 50, 4),
-                   (2, 100, 4), (2, 100, 100, 4), (2, 500, 100, 4), (2, 500, 500, 4)],
-        'activation': ['ReLU'],
-        # 'activation': ['ReLU', 'Sigmoid'],
-    }
-    
-    params['optimizer'] = get_optimizer
-
-    tunable_model = TunableModel(
-        model_class=nn.MLP,
-        hyperparameters=params,
-        validator=None,
-    )
-
-    models = tunable_model.fit(
-        df[['x', 'y']].to_numpy(),
-        labels_encoding(df['label'].to_numpy()),
-        training_params={'num_epochs': 10000, 'batch_size': len(df[['label']])},
-        metrics_dict={'compute_metrics': True, 'metrics_dict': {'accuracy': accuracy, 'loss': mean_squared_error}}
-    )
-
-    print(f"Trained {len(models)} models with different hyperparameters.")
-
-    fig, axs = plt.subplots(1, 4, figsize=(20, 10))
-
-    x_min, x_max = df['x'].min() - 0.5, df['x'].max() + 0.5
-    y_min, y_max = df['y'].min() - 0.5, df['y'].max() + 0.5
-    x_list, y_list = np.meshgrid(np.arange(x_min, x_max, 0.01), np.arange(y_min, y_max, 0.01))
-    X_list = np.dstack([x_list, y_list])
-
-    cmap = matplotlib.colors.ListedColormap(['red', 'blue', 'green'])
-    colors = df['label'].astype("category").cat.codes
-
-    for ax, (model, params, metrics) in zip(axs.flat, models):
-        ax.set_title(f"Widths: {params['widths']}, Activation: {params['activation']}")
-        
-        # ax.plot(range(len(metrics['loss'])), metrics['loss'], label='Loss')
-        # ax.plot(range(len(metrics['accuracy'])), metrics['accuracy'], label='Accuracy')
-        
-        print(f"Final accuracy: {metrics['accuracy'][-1]:.4f}, Final loss: {metrics['loss'][-1]:.4f}")
-        
-        # Plot decision boundary
-        h_list = model(X_list)
-        
-        ax.contourf(x_list, y_list, h_list, cmap=cmap, alpha=0.3)
-        ax.scatter(df['x'], df['y'], c=colors, edgecolor='k')
-        
-    plt.tight_layout()
-    plt.show()
+#     params = {
+#         'widths': [(2, 10, 4), (2, 10, 10, 4), (2, 50, 10, 4), (2, 50, 50, 4),
+#                    (2, 100, 4), (2, 100, 100, 4), (2, 500, 100, 4), (2, 500, 500, 4)],
+#         'activation': ['ReLU'],
+#         # 'activation': ['ReLU', 'Sigmoid'],
+#     }
+#     
+#     params['optimizer'] = get_optimizer
+# 
+#     tunable_model = TunableModel(
+#         model_class=nn.MLP,
+#         hyperparameters=params,
+#         validator=None,
+#     )
+# 
+#     models = tunable_model.fit(
+#         df[['x', 'y']].to_numpy(),
+#         labels_encoding(df['label'].to_numpy()),
+#         training_params={'num_epochs': 10000, 'batch_size': len(df[['label']])},
+#         metrics_dict={'compute_metrics': True, 'metrics_dict': {'accuracy': accuracy, 'loss': mean_squared_error}}
+#     )
+# 
+#     print(f"Trained {len(models)} models with different hyperparameters.")
+# 
+#     fig, axs = plt.subplots(1, 4, figsize=(20, 10))
+# 
+#     x_min, x_max = df['x'].min() - 0.5, df['x'].max() + 0.5
+#     y_min, y_max = df['y'].min() - 0.5, df['y'].max() + 0.5
+#     x_list, y_list = np.meshgrid(np.arange(x_min, x_max, 0.01), np.arange(y_min, y_max, 0.01))
+#     X_list = np.dstack([x_list, y_list])
+# 
+#     cmap = matplotlib.colors.ListedColormap(['red', 'blue', 'green'])
+#     colors = df['label'].astype("category").cat.codes
+# 
+#     for ax, (model, params, metrics) in zip(axs.flat, models):
+#         ax.set_title(f"Widths: {params['widths']}, Activation: {params['activation']}")
+#         
+#         # ax.plot(range(len(metrics['loss'])), metrics['loss'], label='Loss')
+#         # ax.plot(range(len(metrics['accuracy'])), metrics['accuracy'], label='Accuracy')
+#         
+#         print(f"Final accuracy: {metrics['accuracy'][-1]:.4f}, Final loss: {metrics['loss'][-1]:.4f}")
+#         
+#         # Plot decision boundary
+#         h_list = model(X_list)
+#         
+#         ax.contourf(x_list, y_list, h_list, cmap=cmap, alpha=0.3)
+#         ax.scatter(df['x'], df['y'], c=colors, edgecolor='k')
+#         
+#     plt.tight_layout()
+#     plt.show()

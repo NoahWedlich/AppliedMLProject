@@ -3,8 +3,6 @@ import numpy as np
 from datagen.SampleGenerator import SampleGenerator
 from datagen.Postprocessors import *
 
-import matplotlib.pyplot as plt
-
 class SeparatedBlobs(SampleGenerator):
     
     def __init__(self, blobs=None, include_background=False, random_seed=None):
@@ -71,15 +69,3 @@ class RandomSeparatedBlobs(SeparatedBlobs):
             blobs.append((cx, cy, radius))
             
         super().__init__(blobs=blobs, include_background=include_background, random_seed=random_seed)
-        
-sampler = SeparatedBlobs(blobs=[(-0.8, 0, 0.2), (0.8, 0, 0.2)], include_background=False)
-
-plt.figure(figsize=(8, 8))
-samples = sampler.sample(num_samples=1000)
-plt.scatter(samples['x'], samples['y'], c=samples['label'].astype('category').cat.codes, cmap='viridis', edgecolor='k')
-plt.xlim(-1, 1)
-plt.ylim(-1, 1)
-plt.title('Separated Blobs Sample')
-plt.xlabel('X Coordinate')
-plt.ylabel('Y Coordinate')
-plt.show()

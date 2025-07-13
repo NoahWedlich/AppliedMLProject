@@ -1,13 +1,13 @@
 import numpy as np
 
-from SampleGenerator import SampleGenerator
-from Postprocessors import *
+from datagen.SampleGenerator import SampleGenerator
+from datagen.Postprocessors import *
 
 class Spirals(SampleGenerator):
 
     def __init__(self, spirals=None, include_background=False, random_seed=None):
         if spirals is None:
-            spirals = [3, 0.1, 0.2, 0.8, 2]
+            spirals = [2, 0.1, 0.2, 0.8, 2]
 
         self.spirals = spirals
 
