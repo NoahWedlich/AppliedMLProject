@@ -1,17 +1,17 @@
 import numpy as np
+import pandas as pd
 
-from datagen.MatrixSampler import MatrixSampler
+from datagen.Sampler import Sampler
 
-class SampleGenerator(MatrixSampler):
+class SampleGenerator(Sampler):
     
-    def __init__(self, labels, random_seed=None):
-        super().__init__(labels=labels, random_seed=random_seed)
+    def __init__(self, labels):
+        super().__init__()
         
-    def get_label(self, x, y):
+        self.labels = labels or {}
+        
+    def _get_samples(self, num_samples):
         raise NotImplementedError("Subclasses should implement this method.")
         
     def sample(self, num_samples=100):
-        coords = np.meshgrid(np.linspace(-1, 1, 100), np.linspace(-1, 1, 100))
-        image = np.vectorize(self.get_label)(coords[0], coords[1])
-        
-        return super().sample(image, num_samples=num_samples)
+        return pd.DataFrame(self._get_samples(num_samples), columns=['x', 'y', 'label'])

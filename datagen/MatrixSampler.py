@@ -18,10 +18,10 @@ class MatrixSampler:
     def get_default_generator(self):
         return lambda w, h: self.generator.random((2,)) * np.array([w, h])
         
-    def get_normalizer(self, width, height):
+    def get_normalizer(self, x_range, y_range):
         return CoordinateMapper(
-            x_in_range=(0, width),
-            y_in_range=(0, height),
+            x_in_range=x_range,
+            y_in_range=y_range,
             x_out_range=(-1, 1),
             y_out_range=(-1, 1)
         )

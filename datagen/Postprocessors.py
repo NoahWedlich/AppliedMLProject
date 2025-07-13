@@ -1,5 +1,12 @@
 
-class PostProcessingChain:
+class Postprocessor:
+    def __call__(self, point):
+        raise NotImplementedError("Subclasses should implement this method.")
+        
+    def get_postprocessors(self):
+        return [self]
+
+class PostProcessingChain(Postprocessor):
     def __init__(self, *postprocessors):
         self.postprocessors = postprocessors
 
@@ -7,8 +14,11 @@ class PostProcessingChain:
         for postprocessor in self.postprocessors:
             point = postprocessor(point)
         return point
+        
+    def get_postprocessors(self):
+        return self.postprocessors
 
-class CoordinateMapper:
+class CoordinateMapper(Postprocessor):
     
     def __init__(self, x_in_range, y_in_range, x_out_range, y_out_range):
         self.x_in_range = x_in_range

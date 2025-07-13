@@ -1,7 +1,10 @@
+import math
 import numpy as np
 
 from datagen.SampleGenerator import SampleGenerator
 from dataclasses import dataclass
+
+import matplotlib.pyplot as plt
 
 @dataclass
 class CBandConf:
@@ -11,24 +14,27 @@ class CBandConf:
 
 class ConcentricBands(SampleGenerator):
 
-    def __init__(self, bandsConf=None, include_background=False, random_seed=None):
-        print(bandsConf)
+    def __init__(self, bandsConf=None):
         if bandsConf is None:
             bandsConf = [CBandConf(0.3, 0.1), CBandConf(0.6, 0.1)]
 
         self.bandsConf = bandsConf
 
-        labels = {i+1: f'Band {i+1}' for i in range(len(bandsConf))}
-        if include_background:
-            labels[0] = 'Background'
+        labels = {i: f'Band {i+1}' for i in range(len(bandsConf))}
 
-        super().__init__(labels=labels, random_seed=random_seed)
+        super().__init__(labels=labels)
 
-    def get_label(self, x, y):
-        for i, bc in enumerate(self.bandsConf):
-            if (bc.radius - bc.width)**2 <= x**2 + y**2 <= (bc.radius + bc.width)**2:
-                return i + 1
-        return 0
+    def _get_samples(self, num_samples):
+        for _ in range(num_samples):
+            band = np.random.choice(self.bandsConf)
+            angle = np.random.uniform(0, 2 * np.pi)
+            radius = np.sqrt(band.radius + np.random.uniform(-band.width / 2, band.width / 2))
+            
+            x = radius * np.cos(angle)
+            y = radius * np.sin(angle)
+            
+            label = self.labels[self.bandsConf.index(band)]
+            yield x, y, label
 
 class RandomConcentricBands(ConcentricBands):
 
