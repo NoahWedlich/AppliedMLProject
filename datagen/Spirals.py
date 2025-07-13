@@ -1,7 +1,7 @@
 import numpy as np
 from dataclasses import dataclass
 
-from MatrixSampler import MatrixSampler
+from SampleGenerator import SampleGenerator
 
 @dataclass
 class SpiralConf:
@@ -11,7 +11,7 @@ class SpiralConf:
     outerRadius: float = 0.8
     rotations: float = 2
 
-class Spirals(MatrixSampler):
+class Spirals(SampleGenerator):
     def __init__(self, spiralConfig, include_background=False, random_seed=None):
         self.spiralConfig = spiralConfig
 
@@ -31,9 +31,3 @@ class Spirals(MatrixSampler):
             if sc.innerRadius <= pointRad <= sc.outerRadius and (pointRadOff % spiralDist) <= sc.width:
                 return i + 1
         return 0
-
-    def sample(self, num_samples=100):
-        coords = np.meshgrid(np.linspace(-1, 1, 100), np.linspace(-1, 1, 100))
-        image = np.vectorize(self.get_label)(coords[0], coords[1])
-
-        return super().sample(image, num_samples=num_samples)

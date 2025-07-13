@@ -1,6 +1,6 @@
 import numpy as np
 
-from datagen.MatrixSampler import MatrixSampler
+from datagen.SampleGenerator import SampleGenerator
 from dataclasses import dataclass
 
 @dataclass
@@ -10,7 +10,7 @@ class HalfMoonConf:
     angle_range: tuple = (0, np.pi)
     centre: tuple = (0, 0)
 
-class HalfMoons(MatrixSampler):
+class HalfMoons(SampleGenerator):
     def __init__(self, moonConfig=None, include_background=False, random_seed=None):
         if moonConfig is None:
             moonConfig = [HalfMoonConf(centre=(-0.2,-0.2)),
@@ -40,9 +40,3 @@ class HalfMoons(MatrixSampler):
                 if in_angle_range(angle, mc.angle_range):
                     return i + 1
         return 0
-
-    def sample(self, num_samples=100):
-        coords = np.meshgrid(np.linspace(-1, 1, 100), np.linspace(-1, 1, 100))
-        image = np.vectorize(self.get_label)(coords[0], coords[1])
-
-        return super().sample(image, num_samples=num_samples)

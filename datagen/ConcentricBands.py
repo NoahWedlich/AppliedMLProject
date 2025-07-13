@@ -1,6 +1,6 @@
 import numpy as np
 
-from datagen.MatrixSampler import MatrixSampler
+from datagen.SampleGenerator import SampleGenerator
 from dataclasses import dataclass
 
 @dataclass
@@ -9,7 +9,7 @@ class CBandConf:
     width: float = 0.1
 
 
-class ConcentricBands(MatrixSampler):
+class ConcentricBands(SampleGenerator):
 
     def __init__(self, bandsConf=None, include_background=False, random_seed=None):
         print(bandsConf)
@@ -29,12 +29,6 @@ class ConcentricBands(MatrixSampler):
             if (bc.radius - bc.width)**2 <= x**2 + y**2 <= (bc.radius + bc.width)**2:
                 return i + 1
         return 0
-
-    def sample(self, num_samples=100):
-        coords = np.meshgrid(np.linspace(-1, 1, 100), np.linspace(-1, 1, 100))
-        image = np.vectorize(self.get_label)(coords[0], coords[1])
-
-        return super().sample(image, num_samples=num_samples)
 
 class RandomConcentricBands(ConcentricBands):
 
