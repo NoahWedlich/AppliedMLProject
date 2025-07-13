@@ -23,4 +23,4 @@ class SampleGenerator(Sampler):
             yield x, y, index, label
         
     def sample(self, num_samples=100):
-        return pd.DataFrame(self._get_samples_and_apply_postprocessors(num_samples), columns=['x', 'y', 'label', 'disply-label'])
+        return pd.DataFrame(self._get_samples_and_apply_postprocessors(num_samples), columns=['x', 'y', 'label', 'display_label'])
