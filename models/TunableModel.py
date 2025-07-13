@@ -1,7 +1,4 @@
-import random
 import multiprocessing as mp
-
-import numpy as np
 
 class CombinationIterator:
     
@@ -41,11 +38,13 @@ class CombinationIterator:
 
 class TunableModel:
     
-    def __init__(self, model_class, hyperparameters, validator=None, random_seed=None):
+    def __init__(self, model_class, hyperparameters, validator=None, process_count=None):
         self.model_class = model_class
         self.combination_iterator = CombinationIterator(hyperparameters, validator)
         
-        np.random.seed(random_seed or random.randint(0, 1000000))
+        if process_count is None:
+            process_count = mp.cpu_count() // 2
+        self.process_count = max(1, process_count)
         
         self.models = []
         
@@ -73,8 +72,7 @@ class TunableModel:
         arguments = [(i, model, X, y, t_params)
             for i, (model, t_params) in enumerate(zip(models, instantiate_training_params))]
         
-        process_count = min(mp.cpu_count() // 2, len(models))
-        
+        process_count = min(self.process_count, len(models))
         with mp.Pool(process_count) as pool:
             print(f"Started fitting {len(models)} models on {process_count} processes.")
             results = pool.starmap(self._fit_model, arguments)

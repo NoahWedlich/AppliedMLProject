@@ -5,7 +5,7 @@ from TunableModel import TunableModel
 
 class TunableNN(TunableModel):
     
-    def __init__(self, hyperparameters, validator, random_seed=None):
+    def __init__(self, hyperparameters, validator):
         if 'widths' not in hyperparameters:
             raise ValueError("Widths must be specified in hyperparameters.")
             
@@ -16,5 +16,4 @@ class TunableNN(TunableModel):
             model_class=nn.MLP,
             hyperparameters=hyperparameters,
             validator=validator,
-            random_seed=random_seed
         )

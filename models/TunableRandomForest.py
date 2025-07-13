@@ -5,7 +5,7 @@ from models.TunableModel import TunableModel
 
 class TunableRandomForest(TunableModel):
     
-    def __init__(self, hyperparameters, validator=None, random_seed=None):
+    def __init__(self, hyperparameters, validator=None):
         if 'n_estimators' not in hyperparameters:
             raise ValueError("Number of estimators must be specified in hyperparameters.")
         
@@ -16,5 +16,4 @@ class TunableRandomForest(TunableModel):
             model_class=RandomForestClassifier,
             hyperparameters=hyperparameters,
             validator=validator,
-            random_seed=random_seed
         )

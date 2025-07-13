@@ -25,14 +25,17 @@ class SeparatedBlobs(SampleGenerator):
         super().__init__(labels=labels)
         
     def _get_samples(self, num_samples):
-        for _ in range(num_samples):
+        generated_samples = 0
+        while generated_samples < num_samples:
             blob = np.random.choice(self.blobConfs)
             
             x = np.random.normal(blob.cx, blob.stddev)
             y = np.random.normal(blob.cy, blob.stddev)
             
             label = self.labels[self.blobConfs.index(blob) + 1]
-            yield x, y, label
+            if -1 < x < 1 and -1 < y < 1:
+                generated_samples += 1
+                yield x, y, label
         
 class RandomSeparatedBlobs(SeparatedBlobs):
 

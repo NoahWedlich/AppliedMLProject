@@ -58,8 +58,8 @@ if __name__ == "__main__":
     # }
     # 
     # sampler = im.ImageSampler(pallete, labels=labels, image=image, random_seed=42)
-    # sampler = sb.RandomSeparatedBlobs(2)
-    sampler = sp.Spirals(sp.SpiralConf(2, 0.05, 0.2, 0.8, 2.6))
+    sampler = sb.RandomSeparatedBlobs(2)
+    # sampler = sp.Spirals(sp.SpiralConf(2, 0.05, 0.2, 0.8, 2.6))
     
     sampler.add_postprocesser(LabelNoise(0.05))
     sampler.add_postprocesser(DomainShift(10, 10))
@@ -72,46 +72,47 @@ if __name__ == "__main__":
     plt.scatter(x=df['x'], y=df['y'], c=df['label'].astype("category").cat.codes, cmap='viridis', edgecolor='k')
     plt.show()
     
-    # params = {
-    #     'n_estimators': [1, 10, 100],
-    #     'max_depth': [1, 10, 100],
-    #     'min_samples_split': [2],
-    #     'max_features': [None]
-    # }
-    # 
-    # tunable_model = TunableRandomForest(
-    #     hyperparameters=params,
-    #     validator=None,
-    #     random_seed=None
-    # )
-    # 
-    # labels = np.unique(df['label'])
-    # label_map = {label: i for i, label in enumerate(labels)}
-    # df['label'] = df['label'].map(label_map).astype(int)
-    # models = tunable_model.fit(df[['x', 'y']].to_numpy(), df['label'].to_numpy())
-    # 
-    # fig, axs = plt.subplots(3, 3, figsize=(30, 30))
-    # x_min, x_max = df['x'].min() - 0.5, df['x'].max() + 0.5
-    # y_min, y_max = df['y'].min() - 0.5, df['y'].max() + 0.5
-    # x_list, y_list = np.meshgrid(np.arange(x_min, x_max, 0.01), np.arange(y_min, y_max, 0.01))
-    # X_list = np.dstack([x_list, y_list])
-    # 
-    # cmap = matplotlib.colors.ListedColormap(['red', 'blue', 'green'])
-    # colors = df['label'].astype("category").cat.codes
-    # 
-    # for ax, (model, params, metrics) in zip(axs.flat, models):
-    #     ax.set_title(f"n_estimators: {params['n_estimators']}, max_depth: {params['max_depth']}")
-    #     ax.set_xlim(x_min, x_max)
-    #     ax.set_ylim(y_min, y_max)
-    #     
-    #     # Plot decision boundary
-    #     h_list = model.decision_function(X_list)
-    #     
-    #     ax.contourf(x_list, y_list, h_list, cmap=cmap, alpha=0.3)
-    #     ax.scatter(df['x'], df['y'], c=colors, edgecolor='k')
-    #     
-    # plt.tight_layout()
-    # plt.show()
+    sys.exit(0)
+    
+    params = {
+        'n_estimators': [1, 10, 100],
+        'max_depth': [1, 10, 100],
+        'min_samples_split': [2],
+        'max_features': [None]
+    }
+    
+    tunable_model = TunableRandomForest(
+        hyperparameters=params,
+        validator=None
+    )
+    
+    labels = np.unique(df['label'])
+    label_map = {label: i for i, label in enumerate(labels)}
+    df['label'] = df['label'].map(label_map).astype(int)
+    models = tunable_model.fit(df[['x', 'y']].to_numpy(), df['label'].to_numpy())
+    
+    fig, axs = plt.subplots(3, 3, figsize=(30, 30))
+    x_min, x_max = df['x'].min() - 0.5, df['x'].max() + 0.5
+    y_min, y_max = df['y'].min() - 0.5, df['y'].max() + 0.5
+    x_list, y_list = np.meshgrid(np.arange(x_min, x_max, 0.01), np.arange(y_min, y_max, 0.01))
+    X_list = np.dstack([x_list, y_list])
+    
+    cmap = matplotlib.colors.ListedColormap(['red', 'blue', 'green'])
+    colors = df['label'].astype("category").cat.codes
+    
+    for ax, (model, params, metrics) in zip(axs.flat, models):
+        ax.set_title(f"n_estimators: {params['n_estimators']}, max_depth: {params['max_depth']}")
+        ax.set_xlim(x_min, x_max)
+        ax.set_ylim(y_min, y_max)
+        
+        # Plot decision boundary
+        h_list = model.decision_function(X_list)
+        
+        ax.contourf(x_list, y_list, h_list, cmap=cmap, alpha=0.3)
+        ax.scatter(df['x'], df['y'], c=colors, edgecolor='k')
+        
+    plt.tight_layout()
+    plt.show()
     
     # gen = cb.RandomConcentricBands(2, 0.2, 0.5, False)
 #     gen = hm.HalfMoons()

@@ -5,7 +5,7 @@ from TunableModel import TunableModel
 
 class TunableKernelSVM(TunableModel):
     
-    def __init__(self, hyperparameters, validator=None, random_seed=None):
+    def __init__(self, hyperparameters, validator=None):
         kernel = hyperparameters.get('kernel', None)
         if kernel is None:
             raise ValueError("Kernel must be specified in hyperparameters.")
@@ -18,8 +18,7 @@ class TunableKernelSVM(TunableModel):
         super().__init__(
             model_class=svm.BinaryKernelSVM,
             hyperparameters=hyperparameters,
-            validator=validator,
-            random_seed=random_seed
+            validator=validator
         )
         
     def fit(self, X, y):
