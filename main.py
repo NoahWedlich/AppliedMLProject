@@ -56,12 +56,11 @@ if __name__ == "__main__":
     # }
     # 
     # sampler = im.ImageSampler(pallete, labels=labels, image=image, random_seed=42)
-    # sampler = sb.RandomSeparatedBlobs(2, False)
-    # sampler = sp.Spirals()
-    # sampler = cb.RandomConcentricBands(3, 0.2, 0.9, False)
+    # sampler = sb.RandomSeparatedBlobs(2)
+    sampler = sp.Spirals(sp.SpiralConf(2, 0.05, 0.2, 0.8, 2.6))
+    # sampler = cb.RandomConcentricBands(3, 0.2, 0.9)
     # sampler = hm.HalfMoons()
-    sampler = cb.ConcentricBands()
-    df = sampler.sample(500)
+    df = sampler.sample(5000)
     
     plt.figure(figsize=(10, 10))
     plt.scatter(x=df['x'], y=df['y'], c=df['label'].astype("category").cat.codes, cmap='viridis', edgecolor='k')
