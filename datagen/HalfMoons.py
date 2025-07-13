@@ -18,25 +18,19 @@ class HalfMoons(SampleGenerator):
 
         self.moonConfig = moonConfig
 
-        labels = {i+1: f'Moon {i+1}' for i in range(len(moonConfig))}
-        if include_background:
-            labels[0] = 'Background'
+        labels = {i: f'Moon {i}' for i in range(len(moonConfig))}
 
-        super().__init__(labels=labels, random_seed=random_seed)
+        super().__init__(labels=labels)
 
-    def get_label(self, x, y):
-        def in_angle_range(angle, angle_range):
-            angle = angle % (2 * np.pi)
-            angle_range = (angle_range[0] % (2 * np.pi), angle_range[1] % (2 * np.pi))
-            if angle_range[0] <= angle_range[1]:
-                return angle_range[0] <= angle <= angle_range[1]
-            else:
-                return angle >= angle_range[0] or angle <= angle_range[1]
+    def _get_samples(self, num_samples):
+        for _ in range(num_samples):
+            moon = np.random.choice(self.moonConfig)
+            angle = np.random.uniform(moon.angle_range[0], moon.angle_range[1])
+            radius = np.sqrt(np.random.uniform((moon.radius-moon.width / 2)**2,
+                                               (moon.radius+moon.width / 2)**2))
 
-        for i, mc in enumerate(self.moonConfig):
-            offset = (x - mc.centre[0], y - mc.centre[1])
-            if (mc.radius - mc.width)**2 <= offset[0]**2 + offset[1]**2 <= (mc.radius + mc.width)**2:
-                angle = np.arctan2(offset[1], offset[0])
-                if in_angle_range(angle, mc.angle_range):
-                    return i + 1
-        return 0
+            x = radius * np.cos(angle) + moon.centre[0]
+            y = radius * np.sin(angle) + moon.centre[1]
+
+            label = self.labels[self.moonConfig.index(moon)]
+            yield x, y, label
