@@ -58,6 +58,4 @@ class RandomConcentricBands(ConcentricBands):
 
         bandsConf = [CBandConf(radii[i], widths[i]) for i in range(num_bands)]
         
-        print(f"Generated {num_bands} bands with radii: {radii} and widths: {widths}")
-        
         super().__init__(bandsConf=bandsConf)
