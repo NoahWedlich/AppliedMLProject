@@ -2,7 +2,6 @@ import numpy as np
 from dataclasses import dataclass
 
 from datagen.SampleGenerator import SampleGenerator
-from datagen.Postprocessors import *
 
 
 @dataclass

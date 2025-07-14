@@ -3,8 +3,7 @@ import pandas as pd
 from PIL import Image
 
 from datagen.Sampler import Sampler
-from datagen.Preprocessors import *
-from datagen.Postprocessors import *
+from datagen.Preprocessors import ColorCollapse, Threshold
 
 
 class ImageSampler(Sampler):
