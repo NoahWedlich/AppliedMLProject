@@ -1,14 +1,14 @@
 
 from AppliedML.courselib.models import nn
 
-from TunableModel import TunableModel
+from models.TunableModel import TunableModel
 
 class TunableNN(TunableModel):
     """
     A specialized TunableModel for Neural Networks that allows tuning of hyperparameters
     """
     
-    def __init__(self, hyperparameters, validator):
+    def __init__(self, hyperparameters, validator=None):
         """
         Initializes the TunableNN with hyperparameters.
         

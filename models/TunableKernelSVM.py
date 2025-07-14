@@ -1,6 +1,6 @@
 from AppliedML.courselib.models import svm
 
-from TunableModel import TunableModel
+from models.TunableModel import TunableModel
 
 class TunableKernelSVM(TunableModel):
     """
@@ -27,7 +27,7 @@ class TunableKernelSVM(TunableModel):
             validator=self.validator
         )
         
-    def validator(params):
+    def validator(self, params):
         """
         Selects valid combinations of hyperparameters for the BinaryKernelSVM.
         
