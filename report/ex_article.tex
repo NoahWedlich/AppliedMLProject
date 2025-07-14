@@ -1,0 +1,85 @@
+% SIAM Article Template
+\documentclass[hidelinks,onefignum,onetabnum]{siamart250211}
+
+% Packages and macros go here
+\usepackage{lipsum}
+\usepackage{amsfonts}
+\usepackage{graphicx}
+\usepackage{epstopdf}
+\usepackage{algorithmic}
+\ifpdf
+  \DeclareGraphicsExtensions{.eps,.pdf,.png,.jpg}
+\else
+  \DeclareGraphicsExtensions{.eps}
+\fi
+
+% Add a serial/Oxford comma by default.
+\newcommand{\creflastconjunction}{, and~}
+
+% Used for creating new theorem and remark environments
+\newsiamremark{remark}{Remark}
+\newsiamremark{hypothesis}{Hypothesis}
+\crefname{hypothesis}{Hypothesis}{Hypotheses}
+\newsiamthm{claim}{Claim}
+\newsiamremark{fact}{Fact}
+\crefname{fact}{Fact}{Facts}
+
+% Sets running headers as well as PDF title and authors
+\headers{Visualizing Overfitting and Model Complexity}{V. Herrmann, N. Wedlich}
+
+% Title. If the supplement option is on, then "Supplementary Material"
+% is automatically inserted before the title.
+\title{Visualizing Overfitting and Model Complexity}
+
+% Authors: full names plus addresses.
+\author{Valentin Herrmann, Noah Wedlich}
+
+\usepackage{amsopn}
+\DeclareMathOperator{\diag}{diag}
+
+% Optional PDF information
+\ifpdf
+\hypersetup{
+  pdftitle={Visualizing Overfitting and Model Complexity},
+  pdfauthor={Valentin Herrmann, Noah Wedlich}
+}
+\fi
+
+% The next statement enables references to information in the
+% supplement. See the xr-hyperref package for details.
+
+\externaldocument[][nocite]{ex_supplement}
+
+\begin{document}
+
+\maketitle
+
+% REQUIRED
+\begin{abstract}
+This project explores how increasing model complexity influences decision boundaries and generalization. Using 2D datasets, we have examined how different models separate data in input space, and how this reflects underfitting, overfitting, and the bias–variance tradeoff.
+\end{abstract}
+
+% % REQUIRED
+% \begin{keywords}
+% example, \LaTeX
+% \end{keywords}
+
+% % REQUIRED
+% \begin{MSCcodes}
+% 68Q25, 68R10, 68U05
+% \end{MSCcodes}
+
+\section{Introduction}
+
+\section{Experiment setup}
+\label{sec:setup}
+
+\section{Results}
+\label{sec:results}
+
+\section{Conclusion}
+\label{sec:conclusion}
+
+Some conclusions here.
+
+\end{document}
