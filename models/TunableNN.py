@@ -1,12 +1,18 @@
 from AppliedML.courselib.models import nn
+from AppliedML.courselib.optimizers import GDOptimizer
 
 from models.TunableModel import TunableModel
-
 
 class TunableNN(TunableModel):
     """
     A specialized TunableModel for Neural Networks that allows tuning of hyperparameters
     """
+    
+    def get_optimizer(params):
+        if params['activation'] == 'ReLU':
+            return GDOptimizer(learning_rate=0.5)
+        else:
+            return GDOptimizer(learning_rate=5)
 
     def __init__(self, hyperparameters, validator=None):
         """
