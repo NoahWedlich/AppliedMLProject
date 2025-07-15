@@ -93,14 +93,17 @@ class TunableModel:
                 if callable(cf.params.get('optimizer')):
                     cf.params['optimizer'] = cf.params['optimizer'](cf.params)
                 
-                injected_progress = cf.params.get('optimizer') is not None
-                injected_progress = injected_progress and cf.training_params.get('num_epochs') is not None
-                injected_progress = injected_progress and cf.training_params.get('batch_size') is not None
-                
-                num_batches = int(len(cf.X) / cf.training_params['batch_size'])
-                num_epochs = cf.training_params.get('num_epochs') * num_batches
+                if cf.training_params is not None:
+                    injected_progress = cf.params.get('optimizer') is not None
+                    injected_progress = injected_progress and cf.training_params.get('num_epochs') is not None
+                    injected_progress = injected_progress and cf.training_params.get('batch_size') is not None
+                else:
+                    injected_progress = False
                 
                 if injected_progress:
+                    num_batches = int(len(cf.X) / cf.training_params['batch_size'])
+                    num_epochs = cf.training_params.get('num_epochs') * num_batches
+                    
                     cf.params['optimizer'] = ReportingOptimizer(
                         cf.params['optimizer'], f"Model {cf.index}", num_epochs, report_queue
                     )
@@ -114,6 +117,8 @@ class TunableModel:
                     cf.params['optimizer'] = model_instance.optimizer
                 
                 result_queue.put((cf.index, model_instance, cf.params, metrics))
+                
+                report_queue.put(TrainingReport(f"Model {cf.index}", 100))
             except mp.queues.Empty:
                 return
         

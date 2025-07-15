@@ -47,32 +47,32 @@ def validator(params):
 
 if __name__ == "__main__":
 
-    # params = {
-    #     'kernel': ['rbf', 'polynomial'],
-    #     'sigma': [0.025, 0.1],
-    #     'degree': range(1),
-    #     'intercept': range(3),
-    # }
-
     params = {
-        'widths': [(2, 10, 10, 2), (2, 20, 20, 2)],
-        'activation': ['ReLU'],
-        # 'activation': ['ReLU', 'Sigmoid'],
+        'kernel': ['rbf', 'polynomial'],
+        'sigma': [0.025, 0.1],
+        'degree': range(1),
+        'intercept': range(3),
     }
 
-    params["optimizer"] = get_optimizer
+    # params = {
+    #     'widths': [(2, 10, 10, 2), (2, 20, 20, 2)],
+    #     'activation': ['ReLU'],
+    #     # 'activation': ['ReLU', 'Sigmoid'],
+    # }
 
-    tunable_model = TunableModel(
-        model_class=nn.MLP,
-        hyperparameters=params,
-        validator=None,
-    )
+    # params["optimizer"] = get_optimizer
 
     # tunable_model = TunableModel(
-    #     model_class=svm.BinaryKernelSVM,
+    #     model_class=nn.MLP,
     #     hyperparameters=params,
-    #     validator=validator
+    #     validator=None,
     # )
+
+    tunable_model = TunableModel(
+        model_class=svm.BinaryKernelSVM,
+        hyperparameters=params,
+        validator=validator
+    )
 
     total_samples = 400
     train_test_split = 0.5
@@ -92,7 +92,7 @@ if __name__ == "__main__":
         # sampler.add_postprocesser(LabelNoise(0.05))
 
         df = sampler.sample(total_samples)
-        # df['label'] = df['label'].astype("category").cat.codes * 2 - 1
+        df['label'] = df['label'].astype("category").cat.codes * 2 - 1
         # df['label'] = labels_encoding(df['label'].to_numpy())
 
         train_df = df[:num_train_samples]
@@ -102,13 +102,14 @@ if __name__ == "__main__":
 
         models = tunable_model.fit(
             train_df[["x", "y"]].to_numpy(),
-            labels_encoding(train_df["label"].to_numpy()),
-            training_params={
-                "num_epochs": 10000,
-                "batch_size": len(train_df[["label"]]),
-                # 'compute_metrics': True,
-                # 'metrics_dict': {'accuracy': accuracy, 'loss': mean_squared_error}
-            },
+            train_df["label"].to_numpy(),
+            # labels_encoding(train_df["label"].to_numpy()),
+            # training_params={
+            #     "num_epochs": 10000,
+            #     "batch_size": len(train_df[["label"]]),
+            #     # 'compute_metrics': True,
+            #     # 'metrics_dict': {'accuracy': accuracy, 'loss': mean_squared_error}
+            # },
         )
 
         accuracies = []
