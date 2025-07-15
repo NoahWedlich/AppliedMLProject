@@ -10,3 +10,5 @@ __pycache__/
 *.thm
 *.synctex.gz
 *.auctex-auto
+*.fls
+*.fdb_latexmk
