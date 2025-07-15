@@ -64,6 +64,18 @@ class RandomForestClassifier(TrainableModel):
         """
         predictions = np.array([tree(X) for tree in self.trees])
         return self._average_vote(predictions)
+        
+    def __call__(self, X):
+        """
+        Calls the decision function to get predictions.
+
+        Parameters:
+        - X: Input data features.
+
+        Returns:
+        - Predicted labels.
+        """
+        return self.decision_function(X)
 
     def _average_vote(self, predictions):
         """
