@@ -105,7 +105,7 @@ if __name__ == "__main__":
             labels_encoding(train_df["label"].to_numpy()),
             training_params={
                 "num_epochs": 10000,
-                "batch_size": len(df[["label"]]),
+                "batch_size": len(train_df[["label"]]),
                 # 'compute_metrics': True,
                 # 'metrics_dict': {'accuracy': accuracy, 'loss': mean_squared_error}
             },

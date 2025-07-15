@@ -2,8 +2,6 @@ import multiprocessing as mp
 import threading as th
 from dataclasses import dataclass
 
-import dask
-
 from AppliedML.courselib.models.base import TrainableModel
 from AppliedML.courselib.optimizers import Optimizer
 
@@ -40,7 +38,6 @@ class ReportingOptimizer(Optimizer):
         if self.epoch % 500 == 0 or self.epoch == self.num_epochs:
             progress = int((self.epoch / self.num_epochs) * 100)
             self.queue.put(TrainingReport(self.model, progress))
-            print(f"Model {self.model}: {progress}% completed")
             
         self.optimizer.update(params, grads)
 
@@ -85,28 +82,31 @@ class TunableModel:
     def _training_worker(self, model_queue, result_queue, report_queue):
         while True:
             try:
-                training_order = model_queue.get(timeout=1)
+                training_order = model_queue.get(timeout=0.25)
                 if isinstance(training_order, TrainingDone):
-                    print("Training worker received shutdown signal.")
-                    break
+                    return
                 if not isinstance(training_order, TrainingOrder):
-                    raise ValueError("Expected TrainingOrder in fitting worker.")
+                    continue
                     
                 cf = training_order
                 
                 if callable(cf.params.get('optimizer')):
                     cf.params['optimizer'] = cf.params['optimizer'](cf.params)
                 
-                injected_progress = cf.params.get('optimizer') is not None and cf.training_params.get('num_epochs') is not None
+                injected_progress = cf.params.get('optimizer') is not None
+                injected_progress = injected_progress and cf.training_params.get('num_epochs') is not None
+                injected_progress = injected_progress and cf.training_params.get('batch_size') is not None
+                
+                num_batches = int(len(cf.X) / cf.training_params['batch_size'])
+                num_epochs = cf.training_params.get('num_epochs') * num_batches
+                
                 if injected_progress:
-                    print(f"Injecting progress reporting for model {cf.index}.")
                     cf.params['optimizer'] = ReportingOptimizer(
-                        cf.params['optimizer'], f"Model {cf.index}", cf.training_params['num_epochs'], report_queue
+                        cf.params['optimizer'], f"Model {cf.index}", num_epochs, report_queue
                     )
-                else:
-                    print(f"No optimizer or num_epochs provided for model {cf.index}. Using default optimizer.")
                 
                 model_instance = cf.model.get_model(cf.params)
+                
                 metrics = model_instance.fit(cf.X, cf.y, **(cf.training_params or {}))
                 
                 if injected_progress:
@@ -115,7 +115,7 @@ class TunableModel:
                 
                 result_queue.put((cf.index, model_instance, cf.params, metrics))
             except mp.queues.Empty:
-                continue 
+                return
         
     def _fit_model(self, index, model, X, y, training_params=None):
         """
@@ -149,11 +149,11 @@ class TunableModel:
             print(" | ".join(model_strings), end="")
             
     def _progress_monitor(self, models, progress_queue):
-        print("Progress monitor started.")
         while True:
             try:
                 result = progress_queue.get(timeout=1)
-                print(result)
+                if isinstance(result, TrainingDone):
+                    return
                 if not isinstance(result, TrainingReport):
                     continue
                 
@@ -164,7 +164,7 @@ class TunableModel:
                         
                 if all(progress >= 100 for progress in models.values()):
                     self._display_progress(models.items(), overwrite=True)
-                    print("\nAll models are done.")
+                    print("\n")
                     return
                 
             except mp.queues.Empty:
@@ -183,18 +183,14 @@ class TunableModel:
         - List of tuples containing the fitted model, their parameters, and the metrics.
         """
         
-        print("Starting model fitting...")
         params = list(self.combination_iterator)
-        print(f"Found {len(params)} parameter combinations to fit.")
         
-        print("Initializing training params...")
         # Instantiate training parameters if necessary
         if callable(training_params):
             instantiated_training_params = [training_params(param) for param in params]
         else:
             instantiated_training_params = [training_params] * len(params)
             
-        print("Starting multiprocessing...")
         model_queue = mp.Queue()
         result_queue = mp.Queue()
         progress_queue = mp.Queue()
@@ -203,7 +199,6 @@ class TunableModel:
         process_count = max(1, min(self.process_count, len(params)))
         print(f"Fitting {len(params)} models with {process_count} processes.")
         
-        print("Starting progress monitor...")
         model_names = [f"Model {i}" for i in range(len(params))]
         models = {name: 0 for name in model_names}
         self._display_progress(models.items(), overwrite=False)
@@ -215,28 +210,27 @@ class TunableModel:
         
         for i, param in enumerate(params):
             model_queue.put(TrainingOrder(i, self, param, X, y, instantiated_training_params[i]))
-            
-        pool = []
+        
         for i in range(process_count):
-            print(f"Starting worker {i+1}/{process_count}...")
-            worker = mp.Process(
-                target=self._training_worker,
-                args=(model_queue, result_queue, progress_queue)
-            )
-            worker.start()
-            pool.append(worker)
-        
-        print("All workers started. Waiting for results...")
-        # progress_monitor.join()
-        
-        # results = []
-        # for _ in range(len(params)):
-        #     results.append(result_queue.get(True))
-        
-        for _ in range(process_count):
             model_queue.put(TrainingDone())
-        
-        for worker in pool:
-            worker.join()
             
-        # return results
+        pool = mp.Pool(
+            processes=process_count,
+            initializer=self._training_worker,
+            initargs=(model_queue, result_queue, progress_queue)
+        )
+            
+        pool.close()
+        
+        results = []
+        for i in range(len(params)):
+            results.append(result_queue.get(True))
+        
+        progress_monitor.join()
+        pool.terminate()
+        
+        print("All models trained. Collecting results...")
+            
+        print("Results collected.")
+            
+        return results
