@@ -2,6 +2,8 @@ import multiprocessing as mp
 import threading as th
 from dataclasses import dataclass
 
+import numpy as np
+
 from AppliedML.courselib.optimizers import Optimizer
 
 from models.CombinationIterator import CombinationIterator
@@ -32,7 +34,6 @@ class TrainingDone:
     """
     Signal to indicate that training is complete.
     """
-    
     pass
 
 class CommunicationsManager:
@@ -118,7 +119,7 @@ class TunableModel:
     """
 
     def __init__(
-        self, model_class, hyperparameters, validator=None, process_count=None
+        self, model_class, hyperparameters, validator=None, process_count=None, random_seed=None
     ):
         """
         Initializes the TunableModel with a model class and hyperparameters.
@@ -137,6 +138,8 @@ class TunableModel:
         self.process_count = max(1, process_count)
 
         self.models = []
+        
+        self.random_seed = random_seed
 
     def get_model(self, parameters):
         """
@@ -148,6 +151,7 @@ class TunableModel:
         Returns:
         - An instance of the model class initialized with the given parameters.
         """
+        np.random.seed(self.random_seed)
         return self.model_class(**parameters)
         
     def _training_worker(self, comm_manager):

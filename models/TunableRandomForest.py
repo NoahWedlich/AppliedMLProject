@@ -8,7 +8,7 @@ class TunableRandomForest(TunableModel):
     A TunableModel for RandomForestClassifier that allows tuning of hyperparameters.
     """
 
-    def __init__(self, hyperparameters, validator=None):
+    def __init__(self, hyperparameters, validator=None, process_count=None, random_seed=None):
         """
         Initializes the TunableRandomForest with hyperparameters.
 
@@ -28,4 +28,6 @@ class TunableRandomForest(TunableModel):
             model_class=RandomForestClassifier,
             hyperparameters=hyperparameters,
             validator=validator,
+            process_count=process_count,
+            random_seed=random_seed
         )

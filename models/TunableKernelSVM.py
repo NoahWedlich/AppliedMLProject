@@ -8,7 +8,7 @@ class TunableKernelSVM(TunableModel):
     A specialized TunableModel for BinaryKernelSVM that allows tuning of hyperparameters
     """
 
-    def __init__(self, hyperparameters):
+    def __init__(self, hyperparameters, process_count=None, random_seed=None):
         """
         Initializes the TunableKernelSVM with hyperparameters.
         """
@@ -30,6 +30,8 @@ class TunableKernelSVM(TunableModel):
             model_class=svm.BinaryKernelSVM,
             hyperparameters=hyperparameters,
             validator=self.validator,
+            process_count=process_count,
+            random_seed=random_seed,
         )
 
     def validator(self, params):
