@@ -56,6 +56,21 @@ In this project we tested if common models like kernel svms, perceptrons as well
 % Mention any design decisions or implementation notes.
 % TunableModel
 
+\subsection{Implementation}
+The implementation of this project can essentially be divided into two parts: the tunable models and the samplers, both of which we will shortly describe here. We chose an object-oriented approach
+to allow for easy extension and reuse of the code and to integrate with the Courselib.
+\begin{description}
+    \item[Tunable Model:] This class provides a convenient way to create and train models on all (or a subset of) the hyperparameter combinations specified. When initialized, it receives
+        a subclass of the Courselib \texttt{TrainableModel} class and a dictionary mapping parameter names to their possible values. When training the model, it will instantiate a model
+        for each combination of hyperparameters and train it on the given data. Optionally, one can also provide a validator function which can limit the training to a subset of the
+        combinations. Since the different models are independent of each other, the training is parallelized using Python's \texttt{multiprocessing} module. We also utilize queues to
+        communicate with the main process, which allows us to display the training progress in real-time. If an optimizer is used for training, we will further wrap it to provide
+        granular progress updates.
+    \item[Samplers:] The samplers are used to generate the datasets on which the models are trained. The subclasses provided here will sample from a distribution on $S\times L\subseteq [-1, 1]^2\times \mathbb{N}$
+        where $S$ is some 2D shape and $L$ is a set of labels. The Samplers also provide methods to apply pre- and postprocessing to the data, which can be used to transform the data into a suitable format for training
+        and to apply transformations to the data after sampling. This allows to easily test the robustness of models using domain shifts or label noise.
+\end{description}
+
 \section{Experiments and Results}
 % Present your results. Use figures, tables, and metrics:
 
