@@ -104,6 +104,39 @@ class CoordinateMapper(Postprocessor):
         return (x_out, y_out), label
 
 
+class LabelSwitch(Postprocessor):
+    """
+    Randomly switches labels of points with a certain frequency.
+    """
+
+    def __init__(self, labels, noise_freq=0.5):
+        """
+        Initializes the label noise postprocessor.
+
+        Parameters:
+        - noise_freq: probability of applying noise to a point.
+        - labels: list of possible labels to switch to.
+        """
+        self.noise_freq = noise_freq
+        self.labels = labels
+
+    def __call__(self, point, label):
+        """
+        Applies random noise to the sample point.
+
+        Parameters:
+        - point: the sample point to be modified (x, y).
+        - label: the label associated with the sample point.
+
+        Returns:
+        - tuple: A tuple containing the original point and the new label.
+        """
+        new_label = label
+        if np.random.rand() < self.noise_freq:
+            new_label = np.random.choice(list(set(self.labels) - set([label])))
+        return point, new_label
+
+
 class LabelNoise(Postprocessor):
     """
     Randomly shifts the sample points with a certain frequency and noise level.
