@@ -1,0 +1,73 @@
+\documentclass[11pt]{article}
+
+% Packages
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath, amssymb}
+\usepackage{graphicx}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+
+% Header/Footer
+\pagestyle{fancy}
+\fancyhf{}
+\rhead{ML Project Report}
+\lhead{Your Name}
+\cfoot{\thepage}
+
+% Section formatting
+\titleformat{\section}{\large\bfseries}{\thesection}{1em}{}
+\titleformat{\subsection}{\normalsize\bfseries}{\thesubsection}{1em}{}
+
+% Title
+\title{\textbf{Machine Learning Project Report}}
+\author{Valentin Herrmann, Noah Wedlich \\
+Applied Machine Learning in Python – LMU Munich}
+\date{\today}
+
+\begin{document}
+
+% NOTE: specification:
+% The report should clearly summarize:
+%     What task was addressed
+%     How it was approached
+%     Why certain methods/experiments were chosen
+%     Key results and interpretations
+% Include relevant figures (e.g., plots, tables).
+
+\maketitle
+
+\section{Task Overview}
+% Briefly describe the dataset or model you worked on, the goal of the project, and why the task is challenging. For example, challenges may include complex preprocessing, large dataset size, class imbalance, poor performance of baseline approaches, or the need for more complex models to achieve good results.
+
+In this project we tested if common models like kernel svms, perceptrons as well as decision tree ensembles suffer from the bias-variance tradeoff. For this purpose we trained and tested the models on simple datasets like concentric bands, interleaving half-moons, spirals and separated Gaussian clusters to produce signs of underfitting and especially of overfitting.
+% too slow ⇒ multiprocessing
+% getting fitting learning_rate
+% creating proper visualizations
+
+\section{Methods}
+% Explain the methods you implemented or analyzed. Include relevant equations:
+
+% \[\min_{\mathbf{w}} \quad \frac{1}{2} \|\mathbf{w}\|^2 + C \sum_{i=1}^n \xi_i \]
+
+% Mention any design decisions or implementation notes.
+% TunableModel
+
+\section{Experiments and Results}
+% Present your results. Use figures, tables, and metrics:
+
+% show used data
+
+% \begin{figure}[h]
+%     \centering
+%     \includegraphics[width=0.5\textwidth]{figures/accuracy_curve.png}
+%     \caption{Training/validation accuracy over epochs.}
+% \end{figure}
+
+\section{Discussion}
+% Summarize key findings, insights, or issues. Optionally, suggest future work or limitations.
+
+\end{document}
