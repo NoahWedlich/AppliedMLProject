@@ -1,3 +1,9 @@
+import os
+
+# Set environment variables because cvxopt might hang otherwise
+os.environ['OMP_NUM_THREADS'] = '1'
+os.environ['MKL_NUM_THREADS'] = '1'
+
 from AppliedML.courselib.models import svm
 
 from models.TunableModel import TunableModel
