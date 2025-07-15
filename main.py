@@ -49,7 +49,7 @@ if __name__ == "__main__":
 
     params = {
         'kernel': ['rbf', 'polynomial'],
-        'sigma': [0.025, 0.1],
+        'sigma': [0.025, 0.1, 0.5],
         'degree': range(1),
         'intercept': range(3),
     }
@@ -84,25 +84,26 @@ if __name__ == "__main__":
 
     iterations = 0
     while True:
-        seed = np.random.randint(0, 1000000)
-        # seed = 179350
-        np.random.seed(seed)
+        test_seed = np.random.randint(0, 1000000)
+        np.random.seed(test_seed)
 
         sampler = sp.Spirals(sp.SpiralConf(2, 0.1, 0.2, 1, 1))
-        # sampler.add_postprocesser(LabelNoise(0.05))
+        sampler.add_postprocessor(LabelNoise(noise_freq=1, noise_level=0.05))
 
         df = sampler.sample(total_samples)
-        df['label'] = df['label'].astype("category").cat.codes * 2 - 1
+        # df['label'] = df['label'].astype("category").cat.codes * 2 - 1
         # df['label'] = labels_encoding(df['label'].to_numpy())
 
         train_df = df[:num_train_samples]
         test_df = df[num_train_samples:]
 
         # models = tunable_model.fit(train_df[['x', 'y']].to_numpy(), train_df['label'].to_numpy())
-
+        
+        train_seed = np.random.randint(0, 1000000)
+        np.random.seed(train_seed)
         models = tunable_model.fit(
             train_df[["x", "y"]].to_numpy(),
-            train_df["label"].to_numpy(),
+            train_df["label"].to_numpy() * 2 - 1,
             # labels_encoding(train_df["label"].to_numpy()),
             # training_params={
             #     "num_epochs": 10000,
@@ -111,14 +112,16 @@ if __name__ == "__main__":
             #     # 'metrics_dict': {'accuracy': accuracy, 'loss': mean_squared_error}
             # },
         )
+        
+        models.sort(key=lambda x: x[0])
 
         accuracies = []
         for i, model, params, metrics in models:
             h_train = model(train_df[['x', 'y']].to_numpy())
             h_test = model(test_df[['x', 'y']].to_numpy())
 
-            train_accuracy = accuracy(h_train, train_df["label"].to_numpy(), False)
-            test_accuracy = accuracy(h_test, test_df["label"].to_numpy(), False)
+            train_accuracy = accuracy(h_train, train_df["label"].to_numpy() * 2 - 1, False)
+            test_accuracy = accuracy(h_test, test_df["label"].to_numpy() * 2 - 1, False)
 
             accuracies.append((train_accuracy, test_accuracy))
 
@@ -127,12 +130,12 @@ if __name__ == "__main__":
         )
         iterations += 1
 
-        # if accuracies[0][0] == 100 and accuracies[0][1] < 80:
-        #     if accuracies[1][0] == 100 and accuracies[1][1] == 100:
-        #         break
-        break
+        if accuracies[0][0] == 100 and accuracies[0][1] < 80:
+            if accuracies[1][0] == 100 and accuracies[1][1] == 100:
+                break
+        # break
 
-    print(f"Found models with seed {seed} after {iterations} iterations.")
+    print(f"Found models with seeds: Test Seed: {test_seed}, Train Seed: {train_seed}")
 
     # image = im.ImageSampler.open_image("smile.png")
     # image = np.vectorize(lambda x: 1 if x > 0 else 0)(image)
@@ -157,8 +160,8 @@ if __name__ == "__main__":
     # sampler = cb.RandomConcentricBands(2, 0.2, 0.9)
     # sampler = hm.HalfMoons()
 
-    # sampler.add_postprocesser(LabelNoise(0.01))
-    # sampler.add_postprocesser(DomainShift(10, 10))
+    # sampler.add_postprocessor(LabelNoise(0.01))
+    # sampler.add_postprocessor(DomainShift(10, 10))
 
     # df = sampler.sample(total_samples)
 
@@ -186,7 +189,7 @@ if __name__ == "__main__":
 
     # models = tunable_model.fit(train_df[['x', 'y']].to_numpy(), train_df['label'].to_numpy())
 
-    fig, axs = plt.subplots(1, 2, figsize=(10, 5))
+    fig, axs = plt.subplots(1, 3, figsize=(15, 5))
     x_min, x_max = df["x"].min() - 0.2, df["x"].max() + 0.2
     y_min, y_max = df["y"].min() - 0.2, df["y"].max() + 0.2
     x_list, y_list = np.meshgrid(
@@ -203,14 +206,18 @@ if __name__ == "__main__":
         h_train = model(train_df[["x", "y"]].to_numpy())
         h_test = model(test_df[["x", "y"]].to_numpy())
 
-        train_accuracy = accuracy(h_train, train_df["label"].to_numpy(), False)
-        test_accuracy = accuracy(h_test, test_df["label"].to_numpy(), False)
+        train_accuracy = accuracy(h_train, train_df["label"].to_numpy() * 2 - 1, False)
+        test_accuracy = accuracy(h_test, test_df["label"].to_numpy() * 2 - 1, False)
 
         # ax.set_title(f"n_estimators: {params['n_estimators']}, max_depth: {params['max_depth']}")
         # ax.set_title(f"Kernel: {params['kernel']}, Sigma: {params['sigma']:.1f}, Degree: {params['degree']}, Intercept: {params['intercept']}")
 
+        # ax.set_title(
+        #     f"Width: {params['widths']} Train: {train_accuracy:.2f}%, Test: {test_accuracy:.2f}%"
+        # )
+        
         ax.set_title(
-            f"Width: {params['widths']} Train: {train_accuracy:.2f}%, Test: {test_accuracy:.2f}%"
+            f"Sigma: {params['sigma']:.2f}"
         )
 
         ax.set_xlim(x_min, x_max)

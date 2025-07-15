@@ -32,7 +32,7 @@ class SampleGenerator(Sampler):
         - num_samples: number of samples to generate.
         """
         for sample in self._get_samples(num_samples):
-            (x, y), label = self.apply_postprocesser(sample[:2], sample[2])
+            (x, y), label = self.apply_postprocessor(sample[:2], sample[2])
 
             index = self.labels_inv.get(label, -1)
 

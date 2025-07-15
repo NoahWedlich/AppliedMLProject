@@ -9,41 +9,41 @@ class Sampler:
 
     def __init__(self):
         """
-        Initializes the Sampler with no preprocesser or postprocesser.
+        Initializes the Sampler with no preprocessor or postprocessor.
         """
-        self.preprocesser = None
-        self.postprocesser = None
+        self.preprocessor = None
+        self.postprocessor = None
 
-    def set_preprocesser(self, preprocesser):
+    def set_preprocessor(self, preprocessor):
         """
-        Sets the preprocesser for the sampler.
-
-        Parameters:
-        - preprocesser: An instance of a Preprocessor to be applied before sampling.
-        """
-        self.preprocesser = preprocesser
-
-    def add_preprocesser(self, preprocesser):
-        """
-        Adds a preprocesser to the sampler to be applied before the existing ones.
+        Sets the preprocessor for the sampler.
 
         Parameters:
-        - preprocesser: An instance of a Preprocessor to be added.
+        - preprocessor: An instance of a Preprocessor to be applied before sampling.
         """
-        if preprocesser is not None:
-            if self.preprocesser is None:
-                self.preprocesser = preprocesser
+        self.preprocessor = preprocessor
+
+    def add_preprocessor(self, preprocessor):
+        """
+        Adds a preprocessor to the sampler to be applied before the existing ones.
+
+        Parameters:
+        - preprocessor: An instance of a Preprocessor to be added.
+        """
+        if preprocessor is not None:
+            if self.preprocessor is None:
+                self.preprocessor = preprocessor
             else:
-                self.preprocesser = PreProcessingChain(
+                self.preprocessor = PreProcessingChain(
                     *(
-                        preprocesser.get_preprocessers()[::-1]
-                        + self.preprocesser.get_preprocessers()[::-1]
+                        preprocessor.get_preprocessors()[::-1]
+                        + self.preprocessor.get_preprocessors()[::-1]
                     )
                 )
 
-    def apply_preprocesser(self, image):
+    def apply_preprocessor(self, image):
         """
-        Applies the preprocesser to the given image.
+        Applies the preprocessor to the given image.
 
         Parameters:
         - image: The input image to be preprocessed.
@@ -51,40 +51,40 @@ class Sampler:
         Returns:
         - The preprocessed image.
         """
-        if self.preprocesser is None:
+        if self.preprocessor is None:
             return image
-        return self.preprocesser(image)
+        return self.preprocessor(image)
 
-    def set_postprocesser(self, postprocesser):
+    def set_postprocessor(self, postprocessor):
         """
-        Sets the postprocesser for the sampler.
-
-        Parameters:
-        - postprocesser: An instance of a Postprocessor to be applied after sampling.
-        """
-        self.postprocesser = postprocesser
-
-    def add_postprocesser(self, postprocesser):
-        """
-        Adds a postprocesser to the sampler to be applied after the existing ones.
+        Sets the postprocessor for the sampler.
 
         Parameters:
-        - postprocesser: An instance of a Postprocessor to be added.
+        - postprocessor: An instance of a Postprocessor to be applied after sampling.
         """
-        if postprocesser is not None:
-            if self.postprocesser is None:
-                self.postprocesser = postprocesser
+        self.postprocessor = postprocessor
+
+    def add_postprocessor(self, postprocessor):
+        """
+        Adds a postprocessor to the sampler to be applied after the existing ones.
+
+        Parameters:
+        - postprocessor: An instance of a Postprocessor to be added.
+        """
+        if postprocessor is not None:
+            if self.postprocessor is None:
+                self.postprocessor = postprocessor
             else:
-                self.postprocesser = PostProcessingChain(
+                self.postprocessor = PostProcessingChain(
                     *(
-                        postprocesser.get_postprocessors()[::-1]
-                        + self.postprocesser.get_postprocessors()[::-1]
+                        postprocessor.get_postprocessors()[::-1]
+                        + self.postprocessor.get_postprocessors()[::-1]
                     )
                 )
 
-    def apply_postprocesser(self, point, label):
+    def apply_postprocessor(self, point, label):
         """
-        Applies the postprocesser to the given point and label.
+        Applies the postprocessor to the given point and label.
 
         Parameters:
         - point: The sample point to be processed (x, y).
@@ -93,9 +93,9 @@ class Sampler:
         Returns:
         - tuple: A tuple containing the processed point and label.
         """
-        if self.postprocesser is None:
+        if self.postprocessor is None:
             return point, label
-        return self.postprocesser(point, label)
+        return self.postprocessor(point, label)
 
     def get_normalizer(self, x_range, y_range):
         """
