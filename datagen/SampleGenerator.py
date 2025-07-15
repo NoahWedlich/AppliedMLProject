@@ -1,3 +1,4 @@
+import numpy as np
 import pandas as pd
 
 from datagen.Sampler import Sampler
@@ -51,3 +52,19 @@ class SampleGenerator(Sampler):
             self._get_samples_and_apply_postprocessors(num_samples),
             columns=["x", "y", "label", "display_label"],
         )
+    
+    def sample_using_seed(self, num_samples=100, seed=None):
+        """
+        Generates samples using a specific seed for reproducibility.
+
+        Parameters:
+        - num_samples: number of samples to generate.
+        - seed: random seed for reproducibility.
+
+        Returns:
+        - pd.DataFrame: DataFrame containing the sample coordinates, labels, and display labels.
+        """
+        if seed is not None:
+            np.random.seed(seed)
+        
+        return self.sample(num_samples)
