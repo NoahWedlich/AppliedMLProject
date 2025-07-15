@@ -42,10 +42,10 @@ class ImageSampler(Sampler):
         self.pallete = pallete or {}
         self.labels = labels or {}
 
-        self.set_preprocesser(
+        self.set_preprocessor(
             ColorCollapse(lambda c: self.pallete.get(tuple(c.tolist()), -1))
         )
-        self.set_postprocesser(self.get_normalizer(0, self.width, 0, self.height))
+        self.set_postprocessor(self.get_normalizer(0, self.width, 0, self.height))
 
     def apply_bw_filter(self, threshold=0.5):
         """
@@ -54,7 +54,7 @@ class ImageSampler(Sampler):
         Parameters:
         - threshold: float, threshold for converting to black-and-white.
         """
-        self.add_preprocesser(Threshold(threshold))
+        self.add_preprocessor(Threshold(threshold))
 
     def _get_samples(self, image, num_samples):
         """
@@ -84,7 +84,7 @@ class ImageSampler(Sampler):
             value = image[pixel[1], pixel[0]]
             if value in self.labels:
                 generated_samples += 1
-                normalized_point = self.apply_preprocesser(point)
+                normalized_point = self.apply_preprocessor(point)
                 yield *normalized_point, value, self.labels[value]
 
     def sample(self, num_samples=100):
@@ -97,7 +97,7 @@ class ImageSampler(Sampler):
         Returns:
         - pd.DataFrame: DataFrame containing the sampled points, their classes, and labels.
         """
-        image = self.apply_preprocesser(self.image)
+        image = self.apply_preprocessor(self.image)
         return pd.DataFrame(
             self._get_samples(image, num_samples), columns=["x", "y", "class", "label"]
         )

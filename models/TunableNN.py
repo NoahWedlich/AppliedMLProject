@@ -14,7 +14,7 @@ class TunableNN(TunableModel):
         else:
             return GDOptimizer(learning_rate=5)
 
-    def __init__(self, hyperparameters, validator=None):
+    def __init__(self, hyperparameters, validator=None, process_count=None, random_seed=None):
         """
         Initializes the TunableNN with hyperparameters.
 
@@ -32,4 +32,6 @@ class TunableNN(TunableModel):
             model_class=nn.MLP,
             hyperparameters=hyperparameters,
             validator=validator,
+            process_count=process_count,
+            random_seed=random_seed
         )

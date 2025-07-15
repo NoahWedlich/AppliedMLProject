@@ -9,7 +9,7 @@ class Preprocessor:
     def __call__(self, image):
         raise NotImplementedError("Subclasses should implement this method.")
 
-    def get_preprocessers(self):
+    def get_preprocessors(self):
         """
         Returns the chain of preprocessors associated with this instance.
 
@@ -47,7 +47,7 @@ class PreProcessingChain(Preprocessor):
             image = preprocessor(image)
         return image
 
-    def get_preprocessers(self):
+    def get_preprocessors(self):
         """
         Returns the list of preprocessors in the chain.
 
