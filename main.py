@@ -55,8 +55,8 @@ if __name__ == "__main__":
     # }
 
     params = {
-        "widths": [(2, 10, 10, 2), (2, 100, 100, 2)],
-        "activation": ["ReLU"],
+        'widths': [(2, 10, 10, 2), (2, 20, 20, 2)],
+        'activation': ['ReLU'],
         # 'activation': ['ReLU', 'Sigmoid'],
     }
 
@@ -112,9 +112,9 @@ if __name__ == "__main__":
         )
 
         accuracies = []
-        for model, params, metrics in models:
-            h_train = model(train_df[["x", "y"]].to_numpy())
-            h_test = model(test_df[["x", "y"]].to_numpy())
+        for i, model, params, metrics in models:
+            h_train = model(train_df[['x', 'y']].to_numpy())
+            h_test = model(test_df[['x', 'y']].to_numpy())
 
             train_accuracy = accuracy(h_train, train_df["label"].to_numpy(), False)
             test_accuracy = accuracy(h_test, test_df["label"].to_numpy(), False)
@@ -192,11 +192,11 @@ if __name__ == "__main__":
         np.arange(x_min, x_max, 0.01), np.arange(y_min, y_max, 0.01)
     )
     X_list = np.dstack([x_list, y_list])
-
-    cmap = matplotlib.colors.ListedColormap(["red", "blue"])
-    colors = df["label"].astype("category").cat.codes
-
-    for ax, (model, params, metrics) in zip(axs.flat, models):
+    
+    cmap = matplotlib.colors.ListedColormap(['red', 'blue'])
+    colors = df['label'].astype("category").cat.codes
+    
+    for ax, (i, model, params, metrics) in zip(axs.flat, models):
         # h_train = model.decision_function(train_df[['x', 'y']].to_numpy())
         # h_test = model.decision_function(test_df[['x', 'y']].to_numpy())
         h_train = model(train_df[["x", "y"]].to_numpy())
