@@ -15,7 +15,7 @@
 \pagestyle{fancy}
 \fancyhf{}
 \rhead{ML Project Report}
-\lhead{Your Name}
+\lhead{Valentin Herrmann, Noah Wedlich}
 \cfoot{\thepage}
 
 % Section formatting
@@ -73,6 +73,26 @@ to allow for easy extension and reuse of the code and to integrate with the Cour
 
 \section{Experiments and Results}
 % Present your results. Use figures, tables, and metrics:
+
+In this project, we focused on Kernel SVMs with the RBF kernel, Perceptrons and Random Forests. We chose one or two complexity-parameters for each model and repeatedly trained the models
+on different combinations of these parameters. We then used several metrics and visualizations to analyze the results for signs of over- and underfitting.
+
+\subsection{Kernel SVMs using the RBF kernel}
+We first considered Kernel Support Vector Machines (SVMs) with the RBF kernel. We chose the kernel width $\sigma$ as the complexity parameter, as it controls the sensitivity of the model to the data, i.e. how strongly the model will adapt to the training data. A small $\sigma$ should lead to a model that is very sensitive to the training data, while a large $\sigma$ should lead to a model that is more robust to noise and outliers. We varied $\sigma$ between $??$ and $??$ and trained the model on spirals and separated Gaussian clusters. Some results of this are shown in Figure~\ref{fig:kernel_svm_results}. \\
+As can be seen, the training accuracy steadily increases with decreasing $\sigma$, reaching $??\%$ for $\sigma=??$. However, the test accuracy only reaches a maximum of $??\%$ for $\sigma=??$ and then starts to decrease again, only being at $??\%$ for $\sigma=??$.
+
+\subsection{Perceptrons}
+We then considered (multilayer) Perceptrons, i.e. fully connected feedforward neural networks, with the ReLU activation function. We chose the number of hidden layers and the number of neurons per layer as the complexity parameters, as they control the capacity of the model to learn complex functions. We varied these parameters one-by-one to isolate their effects on the model's performance. First we fixed the number of neurons per layer to $??$ and varied the number of hidden layers between $??$ and $??$, the results of which can be seen in Figure~\ref{fig:perceptron_results_layers}. \\
+Then we fixed the number of hidden layers to $??$ and varied the number of neurons per layer between $??$ and $??$, as shown in Figure~\ref{fig:perceptron_results_neurons}. \\
+As can be seen in the figures, the accuracies of the models follow similar trends as the Kernel SVMs, albeit in a less pronounced way, with the difference being stronger when varying the layers.
+
+\subsection{Random Forests}
+Finally, we considered Random Forests using average voting. We chose both the amount of trees in the ensemble and the maximum tree depth as the complexity parameters. The number of trees controls the amount of noise in the model, as more trees will lead to a more stable model, while the maximum tree depth controls how complex the individual trees can be. First used $??$ observers and varied the maximum tree depth between $??$ and $??$, as shown in in Figure~\ref{fig:random_forest_results}. \\
+Then we fixed the maximum tree depth to $??$ and varied the number of trees between $??$ and $??$. The results of this are presented in Figure~\ref{fig:random_forest_results_trees}. \\
+In contrast to the previous models, the training and test accuracies had a similiar evolution during both experiments, with the training accuracy being slightly higher than the test accuracy.
+
+\subsection{Final Comparison}
+Finally we trained all three types of models on the same dataset, varying the above mentioned complexity parameters. The results of this are shown in Figure~\ref{fig:final_comparison}. 
 
 % show used data
 
