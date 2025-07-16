@@ -43,7 +43,7 @@ Applied Machine Learning in Python – LMU Munich}
 \section{Task Overview}
 % Briefly describe the dataset or model you worked on, the goal of the project, and why the task is challenging. For example, challenges may include complex preprocessing, large dataset size, class imbalance, poor performance of baseline approaches, or the need for more complex models to achieve good results.
 
-In this project we tested if common models like kernel svms, perceptrons as well as decision tree ensembles suffer from the bias-variance tradeoff. For this purpose we trained and tested the models on simple datasets like concentric bands, interleaving half-moons, spirals and separated Gaussian clusters to produce signs of underfitting and especially of overfitting.
+In this project we tested if common models like Kernel SVMs, perceptrons as well as decision tree ensembles suffer from the bias-variance tradeoff. For this purpose we trained and tested the models on simple datasets like concentric bands, interleaving half-moons, spirals and separated Gaussian clusters to produce signs of underfitting and especially of overfitting.
 % too slow ⇒ multiprocessing
 % getting fitting learning_rate
 % creating proper visualizations
@@ -56,7 +56,6 @@ In this project we tested if common models like kernel svms, perceptrons as well
 % Mention any design decisions or implementation notes.
 % TunableModel
 
-\subsection{Implementation}
 The implementation of this project can essentially be divided into two parts: the tunable models and the samplers, both of which we will shortly describe here. We chose an object-oriented approach
 to allow for easy extension and reuse of the code and to integrate with the Courselib.
 \begin{description}
@@ -74,25 +73,45 @@ to allow for easy extension and reuse of the code and to integrate with the Cour
 \section{Experiments and Results}
 % Present your results. Use figures, tables, and metrics:
 
-In this project, we focused on Kernel SVMs with the RBF kernel, Perceptrons and Random Forests. We chose one or two complexity-parameters for each model and repeatedly trained the models
-on different combinations of these parameters. We then used several metrics and visualizations to analyze the results for signs of over- and underfitting.
-
-\subsection{Kernel SVMs using the RBF kernel}
-We first considered Kernel Support Vector Machines (SVMs) with the RBF kernel. We chose the kernel width $\sigma$ as the complexity parameter, as it controls the sensitivity of the model to the data, i.e. how strongly the model will adapt to the training data. A small $\sigma$ should lead to a model that is very sensitive to the training data, while a large $\sigma$ should lead to a model that is more robust to noise and outliers. We varied $\sigma$ between $??$ and $??$ and trained the model on spirals and separated Gaussian clusters. Some results of this are shown in Figure~\ref{fig:kernel_svm_results}. \\
-As can be seen, the training accuracy steadily increases with decreasing $\sigma$, reaching $??\%$ for $\sigma=??$. However, the test accuracy only reaches a maximum of $??\%$ for $\sigma=??$ and then starts to decrease again, only being at $??\%$ for $\sigma=??$.
+In this project, we focused on Kernel SVMs with the RBF kernel, Perceptrons, and Random Forests. We chose a complexity-parameter for each model and repeatedly trained the models
+at different complexities. We then used several metrics to analyze the results for signs of over- and underfitting.
 
 \subsection{Perceptrons}
-We then considered (multilayer) Perceptrons, i.e. fully connected feedforward neural networks, with the ReLU activation function. We chose the number of hidden layers and the number of neurons per layer as the complexity parameters, as they control the capacity of the model to learn complex functions. We varied these parameters one-by-one to isolate their effects on the model's performance. First we fixed the number of neurons per layer to $??$ and varied the number of hidden layers between $??$ and $??$, the results of which can be seen in Figure~\ref{fig:perceptron_results_layers}. \\
-Then we fixed the number of hidden layers to $??$ and varied the number of neurons per layer between $??$ and $??$, as shown in Figure~\ref{fig:perceptron_results_neurons}. \\
-As can be seen in the figures, the accuracies of the models follow similar trends as the Kernel SVMs, albeit in a less pronounced way, with the difference being stronger when varying the layers.
+We first considered (multilayer) Perceptrons, i.e. fully connected feedforward neural networks, with the ReLU activation function. We chose the number of hidden layers and the number of neurons per layer as the complexity parameters, as they control the capacity of the model to learn complex functions. We varied these parameters one-by-one to isolate their effects on the model's performance. First we fixed the number of neurons per layer to $30$ and varied the number of hidden layers between $2$ and $16$, the results of which can be seen in Figure~\ref{fig:perceptron_results_layers}.\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.8\textwidth]{img/perceptron-depth-result.png}
+    \caption{Perceptron results with varying number of hidden layers.}
+    \label{fig:perceptron_results_layers}
+\end{figure}\\
+As can be seen, the training accuracy increases with the number of hidden layers as the model can learn more complex patterns. However, the test accuracy, and thus the generalization performance, starts to decrease after a certain point, indicating that the model is overfitting. This also becomes visible in the decision boundaries: the model is first too simple to separate the data, then finds the correct decision boundary, but then starts to overfit, leading to an unnecessarily complex decision boundary. This effect wasn't observed when varying the number of neurons per layer.
+
+\subsection{Kernel SVMs using the RBF kernel}
+Next we analyzed Kernel Support Vector Machines (SVMs) with the RBF kernel. We chose the kernel width $\sigma$ as the complexity parameter, as it controls the sensitivity of the model to the data, i.e. how strongly the model will adapt to the training data. We varied $\sigma$ between $0.02$ and $1$ and trained the model on the spirals. Some results of this are shown in Figure~\ref{fig:kernel_svm_results}.\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.7\textwidth]{img/ksvm-result.png}
+    \caption{Kernel SVM results with varying kernel width $\sigma$.}
+    \label{fig:kernel_svm_results}
+\end{figure}\\
+These three plots nicely show the three stages of the bias-variance tradeoff. The model on the right is too simple to separate the data, leading to underfitting. The model in the middle is able to separate the data correctly, but the model on the left is too complex and starts to overfit, leading to a drastically worse generalization performance. This also becomes apparent in the decision boundaries, as the model on the left essentially memorizes each training point.
 
 \subsection{Random Forests}
-Finally, we considered Random Forests using average voting. We chose both the amount of trees in the ensemble and the maximum tree depth as the complexity parameters. The number of trees controls the amount of noise in the model, as more trees will lead to a more stable model, while the maximum tree depth controls how complex the individual trees can be. First used $??$ observers and varied the maximum tree depth between $??$ and $??$, as shown in in Figure~\ref{fig:random_forest_results}. \\
-Then we fixed the maximum tree depth to $??$ and varied the number of trees between $??$ and $??$. The results of this are presented in Figure~\ref{fig:random_forest_results_trees}. \\
-In contrast to the previous models, the training and test accuracies had a similiar evolution during both experiments, with the training accuracy being slightly higher than the test accuracy.
+Finally, we considered Random Forests using average voting. We chose both the amount of trees in the ensemble and the maximum tree depth as the complexity parameters. The number of trees controls the amount of noise in the model, while the maximum tree depth controls how complex the individual trees can be. In Figure~\ref{fig:random_forest_results} we show the results of varying the depth, while the effects of varying the number of trees can be seen in the supplementary material.
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.7\textwidth]{img/forest-depth-result.png}
+    \caption{Random Forest results with varying maximum tree depth.}
+    \label{fig:random_forest_results}
+\end{figure}\\
+These models also exhibit the bias-variance tradeoff, however the overfitting is less pronounced than in the previous models, with the difference in training accuracy being only $2.5\%$.
 
 \subsection{Final Comparison}
-Finally we trained all three types of models on the same dataset, varying the above mentioned complexity parameters. The results of this are shown in Figure~\ref{fig:final_comparison}. 
+Finally we compared the three models on the spirals dataset, using the same complexity parameters as before. The results can be seen in Figure~\ref{fig:final_comparison}. As can be seen, most models follow the same trend, where the training accuracy increases with the complexity, while the test accuracy first increases and then decreases again. The Kernel SVMs are the most sensitive to this effect, as they are less reliant on huge models than the Perceptrons and Random Forests.
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.6\textwidth]{img/final-result.png}
+    \caption{Final comparison of the three models on the noisy spirals dataset.}
+    \label{fig:final_comparison}
+\end{figure}
 
 % show used data
 
@@ -104,5 +123,6 @@ Finally we trained all three types of models on the same dataset, varying the ab
 
 \section{Discussion}
 % Summarize key findings, insights, or issues. Optionally, suggest future work or limitations.
+We have analyzed the effects of model complexity on the performance of different models and found that all models exhibit signs of overfitting, indicating that the bias-variance tradeoff is a fundamental phenomenon in machine learning. The Kernel SVMs were the most sensitive to this effect. However, we believe that the perceptrons would also show more pronounced overfitting with larger model architectures, something we plan to investigate in the future. 
 
 \end{document}
