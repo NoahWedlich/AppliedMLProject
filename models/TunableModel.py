@@ -98,6 +98,8 @@ class ReportingOptimizer(Optimizer):
         self.num_epochs = num_epochs
         self.queue = queue
         
+        self.freq = self.num_epochs // 100 if self.num_epochs > 100 else 1
+        
     def update(self, params, grads):
         """
         Updates the model parameters and sends a progress report.
@@ -107,7 +109,7 @@ class ReportingOptimizer(Optimizer):
         - grads: Gradients computed for the parameters.
         """
         self.epoch += 1
-        if self.epoch % 500 == 0 or self.epoch == self.num_epochs:
+        if self.epoch % self.freq == 0 or self.epoch == self.num_epochs:
             progress = int((self.epoch / self.num_epochs) * 100)
             self.queue.put(TrainingReport(self.model, progress))
             
